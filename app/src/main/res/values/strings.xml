@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="http://schemas.android.com/apk/res-auto">
+
+    <string name="app_name">Sunshine</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_share">Share</string>
+    <string name="action_mail">Mail</string>
+    <string name="action_settings">Settings</string>
+    <!-- Menu label to view the user's location setting on a map -->
+    <string name="action_view_location">View Location</string>
+    <!-- Menu label to fetch updated weather info from the server -->
+    <string name="action_refresh" translatable="false">Refresh</string>
+    <string name="weather_api_uri_path" translatable="false">http://api.openweathermap.org/data/2.5/forecast/daily</string>
+    <string name="title_activity_detail">Details</string>
+    <!-- Label for the Location preference [CHAR LIMIT=30] -->
+    <string name="pref_location_label">Location</string>
+    <!-- Key name for storing location in SharedPreferences [CHAR LIMIT=NONE] -->
+    <string name="pref_location_key" translatable="false">location</string>
+    <!-- Key name for storing location in SharedPreferences [CHAR LIMIT=NONE] -->
+    <string name="pref_location_default" translatable="false">94043</string>
+    <!-- Label for the Temperature Units preference [CHAR LIMIT=30] -->
+    <string name="pref_units_label">Temperature Units</string>
+    <!-- Key name for storing the value of the selected list entry in SharedPreferences [CHAR LIMIT=NONE] -->
+    <string name="pref_units_key" translatable="false">units</string>
+    <!-- List entry labels for the temperature units setting -->
+    <string name="pref_units_metric" translatable="false">Metric</string>
+    <string name="pref_units_imperial" translatable="false">Imperial</string>
+    <string-array name="pref_units_entries">
+        <item>@string/pref_units_metric</item>
+        <item>@string/pref_units_imperial</item>
+    </string-array>
+    <!-- List entry values associated with the list entry labels; these are the values returned
+         by the getString method of the SharedPreference instance when called with pref_units_key
+         as the argument -->
+    <string-array name="pref_units_values">
+        <item>@string/pref_units_metric</item>
+        <item>@string/pref_units_imperial</item>
+    </string-array>
+
+    <!-- Date label when displaying today's weather forecast [CHAR LIMIT=20] -->
+    <string name="today">Today</string>
+
+    <!-- Date label when displaying tomorrow's weather forecast [CHAR LIMIT=20] -->
+    <string name="tomorrow">Tomorrow</string>
+
+    <!-- Date format for displaying day of week and date (i.e., 'Mon Jun 8') [CHAR LIMIT=20]
+         The xliff:g tag marks that the text inside should not be translated -->
+    <string name="format_full_friendly_date">
+        <xliff:g id="day_of_week">%1$s</xliff:g>, <xliff:g id="date">%2$s</xliff:g>
+    </string>
+
+    <!-- Temperature formats; \u00B0 is the Unicode character for the degrees symbol.
+         The xliff:g tag marks that the text inside should not be translated -->
+    <string name="format_temperature">
+        <xliff:g id="temp">%1.0f</xliff:g>\u00B0
+    </string>
+
+    <!-- Strings for the Detail view -->
+    <!-- Humidity: 84% -->
+    <string name="format_humidity">Humidity:
+        <xliff:g id="humidity">%1.0f</xliff:g>%%</string>
+    <!-- Wind: 6 km/h NW  or 9 mph NW-->
+    <string name="format_wind">Wind:
+        <xliff:g id="wind">%1.0f</xliff:g> <xliff:g id="wind_units">%2$s</xliff:g> <xliff:g id="wind_direction">%3$s</xliff:g>
+    </string>
+    <!-- Pressure: 1014 hPa or 30.22 inHg -->
+    <string name="format_pressure">Pressure:
+        <xliff:g id="pressure">%1.0f</xliff:g> <xliff:g id="pressure_units">%2$s</xliff:g>
+    </string>
+</resources>
