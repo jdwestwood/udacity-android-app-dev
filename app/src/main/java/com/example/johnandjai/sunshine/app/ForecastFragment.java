@@ -48,9 +48,12 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     private final String LOG_TAG = getClass().getSimpleName();
 
     private String mLocation;                    // instance variance to save our location
+    private boolean mUseTodayLayout;
+
     // Each loader in a Fragment has an ID, which allows multiple Loaders to be active at the
     // same time.
     private static final int FORECAST_LOADER = 0;
+    private static String SELECTED_KEY = "cursor_position";
 
     // For the forecast view, we are showing only a small subset of the stored data.
     // Specify the columns we need.
@@ -88,6 +91,8 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     // same data when the user changes the orientation of the phone.  We also use ForecastAdapter,
     // which is a custom CursorAdapter, to load the data from the Cursor to the ListView items.
     private ForecastAdapter mForecastAdapter;
+    private ListView mListView;
+    private static int mPosition;                // current selected position in the forecast list
 
     // implement the LoaderManager.LoaderCallbacks<Cursor> interface
     @Override
@@ -119,6 +124,11 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor data) {
 //        Log.d(LOG_TAG, "Hello from onLoadFinished");
         mForecastAdapter.swapCursor(data);
+        if (mPosition != ListView.INVALID_POSITION) {
+            // If we do not need to restart the loader, and there is a desired position to
+            // restore to, do so now.
+            mListView.setSelection(mPosition);
+        }
     }
 
     @Override
@@ -179,8 +189,13 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+                             final Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+        if (savedInstanceState != null && savedInstanceState.containsKey(SELECTED_KEY)) {
+            // The ListView probably has not been populated yet.  Perform the actual swapout
+            // in onLoadFinished.
+            mPosition = savedInstanceState.getInt(SELECTED_KEY);
+        }
         // Original code connected the daily forecast string parsed from the Json from the
         // OpenWeather API to a single TextView using an ArrayAdapter
         // Needed in original method of populating data based on using an ArrayAdapter
@@ -245,18 +260,20 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         // supports multiple list item views: today's forecast has a different layout than
         // all the other days.
         mForecastAdapter = new ForecastAdapter(getActivity(), null, 0);
+        mForecastAdapter.setUseTodayLayout(mUseTodayLayout);
 
-        ListView listView = (ListView) rootView.findViewById(R.id.listview_forecast);
-        listView.setAdapter(mForecastAdapter);
+        mListView = (ListView) rootView.findViewById(R.id.listview_forecast);
+        mListView.setAdapter(mForecastAdapter);
         // set the click listener for a forecast item in the listView.
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             // anonymous class syntax for implementing the AdapterView.OnItemClickListener
             // interface.
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                mPosition = position;
                 ForecastAdapter adapter = (ForecastAdapter) adapterView.getAdapter();
                 Cursor cursor = adapter.getCursor();
-                if (cursor != null && cursor.moveToPosition(position)) {
+                if (cursor != null && cursor.moveToPosition(mPosition)) {
                     // Original method used an ArrayAdapter, and the forecast string was already a
                     // single formatted string; pass the forecast string using Intent.EXTRA_TEXT:
                     // String forecast = mForecastAdapter.getItem(position);
@@ -294,6 +311,17 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     }
 
     @Override
+    public void onSaveInstanceState(Bundle outState) {
+        // When tablets rotate, the currently selection list item needs to be saved.
+        // When no item is selected, mPosition will be set to ListView.INVALID_POSITION,
+        // so check for that before storing.
+        if (mPosition != ListView.INVALID_POSITION){
+            outState.putInt(SELECTED_KEY, mPosition);
+        }
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
     public void onStart() {
         super.onStart();
     }
@@ -312,5 +340,12 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         // Get the location value in the Settings and get the weather forecast data.
         String location = Utility.getPreferredLocation(getActivity());
         new FetchWeatherTask(getActivity()).execute(location);
+    }
+
+    public void setUseTodayLayout(boolean useTodayLayout) {
+        mUseTodayLayout = useTodayLayout;
+        if (mForecastAdapter != null) {
+            mForecastAdapter.setUseTodayLayout(mUseTodayLayout);
+        }
     }
 }

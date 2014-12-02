@@ -275,7 +275,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_detail_layout, container, false);
         // Original version: the TextView is populated with the forecast or date string
         // passed in Intent.EXTRA_TEXT; in the final version, the forecast data is loaded
         // via a Loader<Cursor> in the onLoadFinished method above.

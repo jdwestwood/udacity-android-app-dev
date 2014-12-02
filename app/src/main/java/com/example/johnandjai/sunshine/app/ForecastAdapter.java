@@ -27,13 +27,19 @@ public class ForecastAdapter extends CursorAdapter {
     }
 
     private final String LOG_TAG = getClass().getSimpleName();
+    private boolean mUseTodayLayout;
     private final int VIEW_TYPE_TODAY = 0;              // list_item_forecast_today.xml
     private final int VIEW_TYPE_FUTURE_DAY = 1;         // list_item_forecast.xml
+
+    // public method to set whether to use the large layout for Today's forecast
+    public void setUseTodayLayout(boolean useTodayLayout) {
+        mUseTodayLayout = useTodayLayout;
+    }
 
     @Override
     public int getItemViewType(int position) {
         // Use VIEW_TYPE_TODAY for the first list item.
-        return (position == 0) ? VIEW_TYPE_TODAY : VIEW_TYPE_FUTURE_DAY;
+        return (position == 0 && mUseTodayLayout) ? VIEW_TYPE_TODAY : VIEW_TYPE_FUTURE_DAY;
     }
 
     @Override

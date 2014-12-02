@@ -1,0 +1,6 @@
+<resources>
+    <!-- a single forecast list item can be selected and will turn blue -->
+    <style name="ForecastListStyle">
+        <item name="android:choiceMode">singleChoice</item>
+    </style>
+</resources>
