@@ -3,4 +3,9 @@
     <style name="ForecastListStyle">
         <item name="android:choiceMode">singleChoice</item>
     </style>
+
+    <style name="ForecastDateTextSize">
+        <item name="android:textSize">20sp</item>
+    </style>
+
 </resources>

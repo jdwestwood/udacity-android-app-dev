@@ -64,7 +64,10 @@
         <xliff:g id="wind">%1.0f</xliff:g> <xliff:g id="wind_units">%2$s</xliff:g> <xliff:g id="wind_direction">%3$s</xliff:g>
     </string>
     <!-- Pressure: 1014 hPa or 30.22 inHg -->
-    <string name="format_pressure">Pressure:
-        <xliff:g id="pressure">%1.0f</xliff:g> <xliff:g id="pressure_units">%2$s</xliff:g>
+    <string name="format_pressure_metric">Pressure:
+        <xliff:g id="pressure_metric">%1.0f</xliff:g> <xliff:g id="pressure_units_metric">%2$s</xliff:g>
+    </string>
+    <string name="format_pressure_imperial">Pressure:
+        <xliff:g id="pressure_imperial">%1.2f</xliff:g> <xliff:g id="pressure_units_imperial">%2$s</xliff:g>
     </string>
 </resources>

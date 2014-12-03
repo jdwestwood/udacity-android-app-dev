@@ -92,7 +92,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     // which is a custom CursorAdapter, to load the data from the Cursor to the ListView items.
     private ForecastAdapter mForecastAdapter;
     private ListView mListView;
-    private static int mPosition;                // current selected position in the forecast list
+    private static int mPosition = 0;           // current selected position in the forecast list
 
     // implement the LoaderManager.LoaderCallbacks<Cursor> interface
     @Override
@@ -128,6 +128,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
             // If we do not need to restart the loader, and there is a desired position to
             // restore to, do so now.
             mListView.setSelection(mPosition);
+            mListView.setItemChecked(mPosition, true);
         }
     }
 

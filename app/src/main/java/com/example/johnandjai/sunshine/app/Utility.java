@@ -216,11 +216,12 @@ public class Utility {
         if (isMetric) {
             pressureUnits = "hPa";
             press = pressure;
+            return context.getString(R.string.format_pressure_metric, press, pressureUnits);
         } else {
             pressureUnits = "inHg";
             press = 0.02953 * pressure;
+            return context.getString(R.string.format_pressure_imperial, press, pressureUnits);
         }
-        return context.getString(R.string.format_pressure, press, pressureUnits);
     }
 
     /**

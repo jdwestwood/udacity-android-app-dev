@@ -29,4 +29,8 @@
         <item name="android:choiceMode">none</item>
     </style>
 
+    <style name="ForecastDateTextSize">
+        <item name="android:textSize">16sp</item>
+    </style>
+
 </resources>

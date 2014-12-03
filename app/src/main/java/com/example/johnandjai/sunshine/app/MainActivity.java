@@ -11,7 +11,10 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.example.johnandjai.sunshine.app.data.WeatherContract;
 import com.johnjai.romainguy.viewserver.ViewServer;
+
+import java.util.Date;
 
 public class MainActivity extends ActionBarActivity implements ForecastFragment.OnItemSelectedListener {
 
@@ -39,13 +42,13 @@ public class MainActivity extends ActionBarActivity implements ForecastFragment.
         if (findViewById(R.id.weather_detail_container) != null) {
             mTwoPane = true;
             if (savedInstanceState == null) {
-             /* Can set the DetailFragment to display details for Today if desired.
-                 String dateString = WeatherContract.getDbDateString(new Date());
-                 DetailFragment detailFragment = DetailFragment.newInstance(dateString);
-                 getSupportFragmentManager().beginTransaction()
+                // Can set the DetailFragment to display details for Today if desired.
+                String dateString = WeatherContract.getDbDateString(new Date());
+                DetailFragment detailFragment = DetailFragment.newInstance(dateString);
+                getSupportFragmentManager().beginTransaction()
                         .replace(R.id.weather_detail_container, detailFragment)
-               //       .addToBackStack(null)
-                        .commit(); */
+                        .addToBackStack(null)
+                        .commit();
             }
         } else {
             mTwoPane = false;
