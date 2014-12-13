@@ -86,29 +86,35 @@ public class ForecastAdapter extends CursorAdapter {
         // appropriate values through the viewHolder instead of costly findViewById calls.
         ViewHolder viewHolder = (ViewHolder) view.getTag();
 
+        // Read the date from cursor.
+        String dateString = cursor.getString(ForecastFragment.COL_WEATHER_DATE);
         // Read weather icon ID from cursor.
         int weatherID = cursor.getInt(ForecastFragment.COL_WEATHER_WEATHER_ID);
         int viewType = getItemViewType(cursor.getPosition());
         switch (viewType) {
             case VIEW_TYPE_TODAY:
                 viewHolder.iconView.setImageResource(Utility.getArtResourceForWeatherCondition(weatherID));
+                // Format the date, depending on whether it is Today, Tomorrow, this week, or next week.
+                viewHolder.dateView.setText(Utility.getFriendlyDayString(context, dateString));
                 break;
             case VIEW_TYPE_FUTURE_DAY:
                 viewHolder.iconView.setImageResource(Utility.getIconResourceForWeatherCondition(weatherID));
+                // Format the date, depending on whether it is Today, Tomorrow, this week, or next week.
+                // Note that VIEW_TYPE_FUTURE_DAY is used for Today when Today's list item forecast
+                // format is the same as it is for future days (i.e., when the MainActivity contains
+                // both the ForecastFragment and the DetailFragment as on tablets in landscape orientation.
+                viewHolder.dateView.setText(Utility.getDayName(context, dateString));
                 break;
             default:
                 Log.v(LOG_TAG, "Unexpected viewType in bindView method");
         }
 
-        // Read the date from cursor.
-        String dateString = cursor.getString(ForecastFragment.COL_WEATHER_DATE);
-        // Get the TextView and set formatted date on it.
-        // Format the date, depending on whether it is Today, Tomorrow, this week, or next week.
-        viewHolder.dateView.setText(Utility.getFriendlyDayString(context, dateString));
-
         // Read weather forecast from cursor.
         String description = cursor.getString(ForecastFragment.COL_WEATHER_DESC);
+        // Set the weather description
         viewHolder.descView.setText(description);
+        // For accessibility
+        viewHolder.iconView.setContentDescription(description);
 
         // Read user preference for metric or imperial temperature units.
         boolean isMetric = Utility.isMetric(context);

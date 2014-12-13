@@ -36,8 +36,8 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
      */
     public interface OnItemSelectedListener {
         /**
-         * Specifies the callback for when an item has been selected.  The containing activity must
-         * implement an onItemSelected method.
+         * Specifies the callback for when an item has been selected.  The containing activity
+         * (MainActivity in this case) must implement the onItemSelected method.
          */
         public void onItemSelected(String date);
     }
@@ -47,13 +47,14 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
 
     private final String LOG_TAG = getClass().getSimpleName();
 
-    private String mLocation;                    // instance variance to save our location
+    private String mLocation;                    // instance variable to save our location
     private boolean mUseTodayLayout;
 
     // Each loader in a Fragment has an ID, which allows multiple Loaders to be active at the
     // same time.
     private static final int FORECAST_LOADER = 0;
-    private static String SELECTED_KEY = "cursor_position";
+    private static String SELECTED_ITEM_KEY = "cursor_position";
+    private static String SELECTED_DATE_KEY = "forecast_date";
 
     // For the forecast view, we are showing only a small subset of the stored data.
     // Specify the columns we need.
@@ -93,6 +94,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     private ForecastAdapter mForecastAdapter;
     private ListView mListView;
     private static int mPosition = 0;           // current selected position in the forecast list
+    private static String mDate;                // forecast date for the currently selected position
 
     // implement the LoaderManager.LoaderCallbacks<Cursor> interface
     @Override
@@ -169,6 +171,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         // Add this line in order for this fragment to handle menu events
         this.setHasOptionsMenu(true);
     }
+
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -188,14 +191,16 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
                 return super.onOptionsItemSelected(item);
         }
     }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              final Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-        if (savedInstanceState != null && savedInstanceState.containsKey(SELECTED_KEY)) {
+        if (savedInstanceState != null && savedInstanceState.containsKey(SELECTED_ITEM_KEY)) {
             // The ListView probably has not been populated yet.  Perform the actual swapout
             // in onLoadFinished.
-            mPosition = savedInstanceState.getInt(SELECTED_KEY);
+            mPosition = savedInstanceState.getInt(SELECTED_ITEM_KEY);
+            mDate = savedInstanceState.getString(SELECTED_DATE_KEY);
         }
         // Original code connected the daily forecast string parsed from the Json from the
         // OpenWeather API to a single TextView using an ArrayAdapter
@@ -303,7 +308,8 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
                     // in the MainActivity (tablet).
                     // mItemSelectedListenerInterface is assigned in the onAttach event handler;
                     // it is the callback interface for the containing activity.
-                    mItemSelectedListenerInterface.onItemSelected(cursor.getString(COL_WEATHER_DATE));
+                    mDate = cursor.getString(COL_WEATHER_DATE);
+                    mItemSelectedListenerInterface.onItemSelected(mDate);
 //                Toast.makeText(getActivity(), forecast, Toast.LENGTH_SHORT).show();
                 }
             }
@@ -316,8 +322,11 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         // When tablets rotate, the currently selection list item needs to be saved.
         // When no item is selected, mPosition will be set to ListView.INVALID_POSITION,
         // so check for that before storing.
-        if (mPosition != ListView.INVALID_POSITION){
-            outState.putInt(SELECTED_KEY, mPosition);
+        if (mPosition != ListView.INVALID_POSITION) {
+            outState.putInt(SELECTED_ITEM_KEY, mPosition);
+            if (mDate != null) {
+                outState.putString(SELECTED_DATE_KEY, mDate);
+            }
         }
         super.onSaveInstanceState(outState);
     }
@@ -348,5 +357,9 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         if (mForecastAdapter != null) {
             mForecastAdapter.setUseTodayLayout(mUseTodayLayout);
         }
+    }
+
+    public String getSelectedForecastDate() {
+        return mDate;
     }
 }

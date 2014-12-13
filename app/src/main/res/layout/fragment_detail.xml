@@ -86,29 +86,53 @@
             </LinearLayout>
         </LinearLayout>
 
-        <TextView
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/detail_humidity_textview"
-            android:text="humidity"
-            android:textAppearance="?android:textAppearanceLarge"
-            android:layout_marginTop="16dp" />
+            android:layout_marginTop="16dp">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/detail_wind_textview"
-            android:text="wind_speed"
-            android:textAppearance="?android:textAppearanceLarge"
-            android:layout_marginTop="4dp" />
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/detail_pressure_textview"
-            android:text="pressure"
-            android:textAppearance="?android:textAppearanceLarge"
-            android:layout_marginTop="4dp" />
-        />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/detail_humidity_textview"
+                    android:text="humidity"
+                    android:textAppearance="?android:textAppearanceLarge" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/detail_wind_textview"
+                    android:text="wind_speed"
+                    android:textAppearance="?android:textAppearanceLarge"
+                    android:layout_marginTop="4dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/detail_pressure_textview"
+                    android:text="pressure"
+                    android:textAppearance="?android:textAppearanceLarge"
+                    android:layout_marginTop="4dp" />
+            </LinearLayout>
+
+            <FrameLayout
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="16dp">
+
+                <view
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    class="com.example.johnandjai.sunshine.app.DirectionSpeedView"
+                    android:id="@+id/detail_direction_speed_view" />
+            </FrameLayout>
+        </LinearLayout>
     </LinearLayout>
 </ScrollView>

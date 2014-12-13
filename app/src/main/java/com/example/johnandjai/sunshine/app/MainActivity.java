@@ -39,24 +39,23 @@ public class MainActivity extends ActionBarActivity implements ForecastFragment.
          // exists in the activity_main.xml layout, as it will if the device is large enough
          // to use the two-pane layout.
          // findViewById returns the FrameView
-        if (findViewById(R.id.weather_detail_container) != null) {
-            mTwoPane = true;
-            if (savedInstanceState == null) {
-                // Can set the DetailFragment to display details for Today if desired.
-                String dateString = WeatherContract.getDbDateString(new Date());
-                DetailFragment detailFragment = DetailFragment.newInstance(dateString);
-                getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.weather_detail_container, detailFragment)
-                        .addToBackStack(null)
-                        .commit();
-            }
-        } else {
-            mTwoPane = false;
-        }
+        mTwoPane = (findViewById(R.id.weather_detail_container) != null);
 
         ForecastFragment forecastFragment = ((ForecastFragment) getSupportFragmentManager()
                     .findFragmentById(R.id.fragment_forecast));
         forecastFragment.setUseTodayLayout(!mTwoPane);
+
+        if (mTwoPane) {
+            String selectedDate = forecastFragment.getSelectedForecastDate();
+            String dateString = (selectedDate == null) ?
+                                 WeatherContract.getDbDateString(new Date()) : selectedDate;
+            // Set the DetailFragment to display details for the currently selected forecast date.
+            DetailFragment detailFragment = DetailFragment.newInstance(dateString);
+            getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.weather_detail_container, detailFragment)
+                        .addToBackStack(null)
+                        .commit();
+        }
 
         // Enable HierarchyViewer functionality; see notes for the ViewServer class in the
         // ViewServer module.

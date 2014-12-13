@@ -82,6 +82,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     private TextView mHumidityView;
     private TextView mWindView;
     private TextView mPressureView;
+    private DirectionSpeedView mDirectionSpeedView;
 
     private static final String FORECAST_SHARE_HASHTAG = " #SunshineApp";
     private String mForecastStr;                         // forecast string for sharing
@@ -155,6 +156,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             int weatherID = cursor.getInt(COL_WEATHER_WEATHER_ID);
             // For the Detail view, use the 'art_' resources, which are the large color images
             mIconView.setImageResource(Utility.getArtResourceForWeatherCondition(weatherID));
+            mIconView.setContentDescription(weatherDesc);
 
             boolean isMetric = Utility.isMetric(getActivity());
 
@@ -180,6 +182,10 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                     cursor.getDouble(COL_WEATHER_PRESSURE),
                     isMetric);
             mPressureView.setText(pressure);
+
+            // Make the wind speed and direction available to
+            mDirectionSpeedView.setSpeed(cursor.getDouble(COL_WEATHER_WIND_SPEED));
+            mDirectionSpeedView.setDirection(cursor.getDouble(COL_WEATHER_DEGREES));
 
             // forecast string for sharing
             mForecastStr = String.format("%s - %s - %s/%s", dateString, weatherDesc, high, low);
@@ -297,6 +303,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         mHumidityView = (TextView) rootView.findViewById(R.id.detail_humidity_textview);
         mWindView = (TextView) rootView.findViewById(R.id.detail_wind_textview);
         mPressureView = (TextView) rootView.findViewById(R.id.detail_pressure_textview);
+        mDirectionSpeedView = (DirectionSpeedView) rootView.findViewById(R.id.detail_direction_speed_view);
 
         return rootView;
     }
