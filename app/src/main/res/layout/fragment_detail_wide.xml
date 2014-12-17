@@ -1,8 +1,14 @@
 <ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/scrollView">
+
+    <!-- Use the tools namespace to specify properties
+         such as text, that should be used while editing
+         in Android Studio, but should not be included
+         in the compiled project -->
 
     <LinearLayout
         android:orientation="horizontal"
@@ -14,21 +20,21 @@
 
         <LinearLayout
             android:orientation="vertical"
-            android:layout_width="120dp"
+            android:layout_width="140dp"
             android:layout_height="wrap_content">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/detail_day_textview"
-                android:text="Today"
+                tools:text="Today"
                 android:textSize="24sp" />
 
             <TextView
                 android:id="@+id/detail_date_textview"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="June 23"
+                tools:text="June 23"
                 style="@style/ForecastDateTextSize"
                 android:textColor="@color/sunshine_dark_grey" />
         </LinearLayout>
@@ -37,77 +43,122 @@
 
         <LinearLayout
             android:orientation="vertical"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="16dp">
 
-            <TextView
+            <LinearLayout
+                android:orientation="horizontal"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/detail_max_temp_textview"
-                android:text="72"
-                android:textSize="96sp" />
+                android:layout_height="wrap_content">
 
-            <TextView
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/detail_max_temp_textview"
+                        tools:text="72"
+                        android:textSize="96sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/detail_min_temp_textview"
+                        tools:text="56"
+                        android:textSize="48sp"
+                        android:textColor="@color/sunshine_dark_grey" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="32dp"
+                    android:gravity="top|center_horizontal">
+
+                    <FrameLayout
+                        android:layout_width="144dp"
+                        android:layout_height="144dp">
+
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/detail_icon"
+                            android:src="@drawable/art_clear"
+                            android:contentDescription="Hello" />
+                    </FrameLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/detail_desc_textview"
+                        tools:text="desc"
+                        android:textAppearance="?android:textAppearanceLarge"
+                        android:textColor="@color/sunshine_dark_grey" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/detail_min_temp_textview"
-                android:text="56"
-                android:textSize="48sp"
-                android:textColor="@color/sunshine_dark_grey" />
+                android:layout_height="wrap_content">
+
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/detail_wind_textview"
+                        tools:text="Wind speed"
+                        android:textAppearance="?android:textAppearanceLarge"
+                        android:layout_marginTop="4dp" />
+
+                </LinearLayout>
+
+                <FrameLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="4dp">
+
+                    <com.example.johnandjai.sunshine.app.DirectionSpeedView
+                        xmlns:custom="http://schemas.android.com/apk/res-auto"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/detail_direction_speed_view"
+                        custom:preferredSize="150dp"
+                        custom:colorLargeCompassPoint="@color/sunshine_sun_orange"
+                        custom:colorSmallCompassPoint="@color/sunshine_sun_orange"
+                        custom:colorCompassCircleStroke="@color/sunshine_sun_orange"
+                        custom:colorCompassCircleFill="@color/sunshine_blue"
+                        custom:colorSpeedCircle="@color/sunshine_light_blue"
+                        custom:colorWindMarker="@color/sunshine_red" />
+                </FrameLayout>
+            </LinearLayout>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/detail_humidity_textview"
-                android:text="humidity"
+                tools:text="Humidity"
                 android:textAppearance="?android:textAppearanceLarge"
-                android:layout_marginTop="4dp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/detail_wind_textview"
-                android:text="wind_speed"
-                android:textAppearance="?android:textAppearanceLarge"
-                android:layout_marginTop="4dp" />
+                android:layout_marginTop="-16dp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/detail_pressure_textview"
-                android:text="pressure"
+                tools:text="Pressure"
                 android:textAppearance="?android:textAppearanceLarge"
                 android:layout_marginTop="4dp" />
 
         </LinearLayout>
 
-        <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="wrap_content"
-            android:layout_height="fill_parent"
-            android:gravity="top|center_vertical|center_horizontal"
-            android:layout_marginLeft="16dp">
-
-            <FrameLayout
-                android:layout_width="144dp"
-                android:layout_height="144dp">
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/detail_icon"
-                    android:src="@drawable/art_clear"
-                    android:contentDescription="Hello" />
-            </FrameLayout>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/detail_desc_textview"
-                android:text="desc"
-                android:textAppearance="?android:textAppearanceLarge"
-                android:textColor="@color/sunshine_dark_grey" />
-        </LinearLayout>
     </LinearLayout>
 </ScrollView>

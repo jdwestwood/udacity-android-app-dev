@@ -232,11 +232,11 @@ public class WeatherProvider extends ContentProvider {
         // a time.
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         final int match = sUriMatcher.match(uri);
+        int insertedCount = 0;
         switch (match) {
             case WEATHER:
             // only need to bulk insert into the weather table.
                 db.beginTransaction();
-                int insertedCount = 0;
                 try {
                     for (ContentValues value: values) {
                         long _id = db.insert(WeatherEntry.TABLE_NAME, null, value);
@@ -249,11 +249,15 @@ public class WeatherProvider extends ContentProvider {
                 finally {
                     db.endTransaction();
                 }
-                return insertedCount;
             default:
                 // the method in super inserts the rows one at a time
-                return super.bulkInsert(uri, values);
+                insertedCount = super.bulkInsert(uri, values);
         }
+        // notify ContentObservers that a change has occurred in the table.
+        if (insertedCount > 0) {
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+        return insertedCount;
     }
 
     @Override

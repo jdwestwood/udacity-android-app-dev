@@ -183,9 +183,9 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                     isMetric);
             mPressureView.setText(pressure);
 
-            // Make the wind speed and direction available to
-            mDirectionSpeedView.setSpeed(cursor.getDouble(COL_WEATHER_WIND_SPEED));
-            mDirectionSpeedView.setDirection(cursor.getDouble(COL_WEATHER_DEGREES));
+            // Make the wind speed and direction available to DirectionSpeedView;
+            mDirectionSpeedView.setDirectionAndSpeed(cursor.getDouble(COL_WEATHER_DEGREES),
+                                                     cursor.getDouble(COL_WEATHER_WIND_SPEED));
 
             // forecast string for sharing
             mForecastStr = String.format("%s - %s - %s/%s", dateString, weatherDesc, high, low);

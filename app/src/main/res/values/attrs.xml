@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="DirectionSpeedView">
+        <attr name="preferredSize" format="dimension" />
+        <attr name="colorLargeCompassPoint" format="color" />
+        <attr name="colorSmallCompassPoint" format="color" />
+        <attr name="colorCompassCircleStroke" format="color" />
+        <attr name="colorCompassCircleFill" format="color" />
+        <attr name="colorSpeedCircle" format="color" />
+        <attr name="colorWindMarker" format="color" />
+    </declare-styleable>
+</resources>

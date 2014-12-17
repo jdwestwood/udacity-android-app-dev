@@ -191,14 +191,15 @@ public class Utility {
     private static String getDirectionFromDegrees(double windDirection) {
         String N_S = "";
         String E_W = "";
-        if (windDirection > -67.5 && windDirection < 67.5) {
+        double normWind = windDirection % 360;
+        if (normWind > 292.5 || normWind < 67.5) {
             N_S = "N";
-        } else if (windDirection < -157.5 || windDirection > 157.5) {
+        } else if (normWind > 112.5 && normWind < 247.5) {
             N_S = "S";
         }
-        if (windDirection >= -157.5 && windDirection <= -67.5) {
+        if (normWind >= 202.5 && normWind <= 337.5) {
             E_W = "W";
-        } else if (windDirection >= 22.5 || windDirection <= 67.5) {
+        } else if (normWind >= 22.5 && normWind <= 157.5) {
             E_W = "E";
         }
         return N_S + E_W;
