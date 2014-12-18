@@ -145,17 +145,24 @@ public class Utility {
         }
     }
 
-    public static String formatTemperature(Context context, double temperature, boolean isMetric) {
+    public static String formatTemperature(Context context, double temperature, boolean isMetric,
+                                           String type) {
         double temp;
         if (!isMetric) {
             temp = 9*temperature/5 + 32;
         } else {
             temp = temperature;
         }
-        // see the definition of the string template 'format_temperature' in
-        // strings.xml to see how we pass 'temp' getString in order to create the
-        // string from the string template.
-        return context.getString(R.string.format_temperature, temp);
+        if (type.equals("high")) {
+            return context.getString(R.string.format_high_temperature_friendly, temp);
+        } else if (type.equals("low")) {
+            return context.getString(R.string.format_low_temperature_friendly, temp);
+        } else {
+            // see the definition of the string template 'format_temperature' in
+            // strings.xml to see how we pass 'temp' getString in order to create the
+            // string from the string template.
+            return context.getString(R.string.format_temperature, temp);
+        }
     }
 
     /**
@@ -175,7 +182,8 @@ public class Utility {
      * @param windDirection The db wind direction -180 deg to +180 deg, 0 deg is north
      * @return The wind string in the form "Wind: 6 km/h NW%" or Wind: "9 mph NW"
      */
-    public static String formatWind(Context context, double windSpeed, double windDirection, boolean isMetric) {
+    public static String formatWind(Context context, double windSpeed, double windDirection,
+                                    boolean isMetric, boolean friendly) {
         String windUnits;
         double wind;
         if (isMetric) {
@@ -185,22 +193,28 @@ public class Utility {
             windUnits = "mph";
             wind = 2.237 * windSpeed;             // 1 mph = 2.237 meters/sec
         }
-        return context.getString(R.string.format_wind, wind, windUnits, getDirectionFromDegrees(windDirection));
+        if (friendly) {
+            return context.getString(R.string.format_wind_friendly, wind, windUnits,
+                    getDirectionFromDegrees(windDirection, true));
+        } else {
+            return context.getString(R.string.format_wind, wind, windUnits,
+                    getDirectionFromDegrees(windDirection, false));
+        }
     }
 
-    private static String getDirectionFromDegrees(double windDirection) {
+    public static String getDirectionFromDegrees(double windDirection, boolean friendly) {
         String N_S = "";
         String E_W = "";
         double normWind = windDirection % 360;
         if (normWind > 292.5 || normWind < 67.5) {
-            N_S = "N";
+            N_S = (friendly) ? "North" : "N";
         } else if (normWind > 112.5 && normWind < 247.5) {
-            N_S = "S";
+            N_S = (friendly) ? "South": "S";
         }
         if (normWind >= 202.5 && normWind <= 337.5) {
-            E_W = "W";
+            E_W = (friendly) ? ((N_S == "") ? "West" : "west") : "W";
         } else if (normWind >= 22.5 && normWind <= 157.5) {
-            E_W = "E";
+            E_W = (friendly) ? ((N_S == "") ? "East" : "east") :"E";
         }
         return N_S + E_W;
     }

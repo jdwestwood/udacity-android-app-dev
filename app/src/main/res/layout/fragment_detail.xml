@@ -21,6 +21,7 @@
             android:layout_height="wrap_content"
             android:id="@+id/detail_day_textview"
             tools:text="Today"
+            android:focusable="true"
             android:textSize="24sp" />
 
         <TextView
@@ -28,6 +29,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             tools:text="June 23"
+            android:focusable="true"
             style="@style/ForecastDateTextSize"
             android:textColor="@color/sunshine_dark_grey" />
 
@@ -51,6 +53,7 @@
                     android:layout_height="wrap_content"
                     android:id="@+id/detail_max_temp_textview"
                     tools:text="72"
+                    android:focusable="true"
                     android:textSize="96sp" />
 
                 <TextView
@@ -60,6 +63,7 @@
                     tools:text="56"
                     android:textSize="48sp"
                     android:textColor="@color/sunshine_dark_grey"
+                    android:focusable="true"
                     android:layout_marginLeft="4dp" />
 
             </LinearLayout>
@@ -79,6 +83,7 @@
                         android:layout_height="wrap_content"
                         android:id="@+id/detail_icon"
                         tools:src="@drawable/art_clear"
+                        android:focusable="true"
                         android:layout_gravity="center" />
                 </FrameLayout>
 
@@ -87,6 +92,7 @@
                     android:layout_height="wrap_content"
                     android:id="@+id/detail_desc_textview"
                     tools:text="desc"
+                    android:focusable="true"
                     android:textAppearance="?android:textAppearanceLarge"
                     android:textColor="@color/sunshine_dark_grey" />
             </LinearLayout>
@@ -109,6 +115,7 @@
                     android:id="@+id/detail_wind_textview"
                     tools:text="Wind speed"
                     android:textAppearance="?android:textAppearanceLarge"
+                    android:focusable="true"
                     android:layout_marginTop="4dp" />
 
             </LinearLayout>
@@ -123,6 +130,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/detail_direction_speed_view"
+                    android:focusable="true"
                     custom:preferredSize="150dp"
                     custom:colorLargeCompassPoint="@color/sunshine_sun_orange"
                     custom:colorSmallCompassPoint="@color/sunshine_sun_orange"
@@ -139,6 +147,7 @@
             android:id="@+id/detail_humidity_textview"
             tools:text="Humidity"
             android:textAppearance="?android:textAppearanceLarge"
+            android:focusable="true"
             android:layout_marginTop="-16dp" />
 
         <TextView
@@ -147,6 +156,7 @@
             android:id="@+id/detail_pressure_textview"
             tools:text="Pressure"
             android:textAppearance="?android:textAppearanceLarge"
+            android:focusable="true"
             android:layout_marginTop="4dp" />
     </LinearLayout>
 </ScrollView>

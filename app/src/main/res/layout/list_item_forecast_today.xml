@@ -6,6 +6,7 @@
 
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -26,7 +27,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Today, Nov 8"
+            tools:text="Today, Nov 8"
             android:id="@+id/list_item_date_textview"
             android:layout_weight="1"
             android:textAppearance="?android:textAppearanceLarge"
@@ -36,7 +37,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="72"
+            tools:text="72"
             android:id="@+id/list_item_high_textview"
             android:textSize="72sp"
             android:textColor="@color/sunshine_white"
@@ -45,7 +46,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="38"
+            tools:text="38"
             android:id="@+id/list_item_low_textview"
             android:layout_weight="1"
             android:textSize="36sp"
@@ -66,12 +67,12 @@
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:id="@+id/list_item_icon"
-            android:src="@drawable/art_clear" />
+            tools:src="@drawable/art_clear" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Clear"
+            tools:text="Clear"
             android:id="@+id/list_item_forecast_textview"
             android:textAppearance="?android:textAppearanceLarge"
             android:paddingBottom="16dp"

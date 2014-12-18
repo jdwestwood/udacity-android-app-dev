@@ -145,13 +145,20 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
         if (cursor.moveToFirst()) {
             String dateString = cursor.getString(COL_WEATHER_DATE);
-            String weatherDesc = cursor.getString(COL_WEATHER_DESC);
             // Set day: 'Wednesday'
-            mDayView.setText(Utility.getDayName(getActivity(), dateString));
+            String day = Utility.getDayName(getActivity(), dateString);
+            mDayView.setText(day);
+            // For accessibility.  View must have focusable = true for content description to be read
+            // when the user touches the item.
+            mDayView.setContentDescription(day);
             // Set date: 'June 24'
-            mDateView.setText(Utility.getFormattedMonthDay(getActivity(), dateString));
+            String date = Utility.getFormattedMonthDay(getActivity(), dateString);
+            mDateView.setText(date);
+            mDateView.setContentDescription(date);
             // Set weather description
+            String weatherDesc = cursor.getString(COL_WEATHER_DESC);
             mDescView.setText(weatherDesc);
+            mDescView.setContentDescription(weatherDesc);
             // Set weather icon
             int weatherID = cursor.getInt(COL_WEATHER_WEATHER_ID);
             // For the Detail view, use the 'art_' resources, which are the large color images
@@ -162,30 +169,48 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
             // Set high and low temperatures
             String high = Utility.formatTemperature(
-                    getActivity(), cursor.getDouble(COL_WEATHER_MAX_TEMP), isMetric);
-            String low = Utility.formatTemperature(
-                    getActivity(), cursor.getDouble(COL_WEATHER_MIN_TEMP), isMetric);
+                    getActivity(), cursor.getDouble(COL_WEATHER_MAX_TEMP), isMetric, "");
             mMaxTempView.setText(high);
+            String high_friendly = Utility.formatTemperature(
+                    getActivity(), cursor.getDouble(COL_WEATHER_MAX_TEMP), isMetric, "high");
+            mMaxTempView.setContentDescription(high_friendly);
+
+            String low = Utility.formatTemperature(
+                    getActivity(), cursor.getDouble(COL_WEATHER_MIN_TEMP), isMetric, "");
             mMinTempView.setText(low);
+            String low_friendly = Utility.formatTemperature(
+                    getActivity(), cursor.getDouble(COL_WEATHER_MIN_TEMP), isMetric, "low");
+            mMinTempView.setContentDescription(low_friendly);
 
             // Set humidity: 'Humidity: 84%'
             String humidity = Utility.formatHumidity(getActivity(), cursor.getDouble(COL_WEATHER_HUMIDITY));
             mHumidityView.setText(humidity);
+            mHumidityView.setContentDescription(humidity);
+
             // Set wind speed and direction: 'Wind: 6 km/h NW'
             String wind = Utility.formatWind(getActivity(),
                     cursor.getDouble(COL_WEATHER_WIND_SPEED),
                     cursor.getDouble(COL_WEATHER_DEGREES),
-                    isMetric);
+                    isMetric, false);
             mWindView.setText(wind);
+            String wind_friendly = Utility.formatWind(getActivity(),
+                    cursor.getDouble(COL_WEATHER_WIND_SPEED),
+                    cursor.getDouble(COL_WEATHER_DEGREES),
+                    isMetric, true);
+            mWindView.setContentDescription(wind_friendly);
+
             // Set pressure: 'Pressure: 1014 kPa'
             String pressure = Utility.formatPressure(getActivity(),
                     cursor.getDouble(COL_WEATHER_PRESSURE),
                     isMetric);
             mPressureView.setText(pressure);
+            mPressureView.setContentDescription(pressure);
 
             // Make the wind speed and direction available to DirectionSpeedView;
             mDirectionSpeedView.setDirectionAndSpeed(cursor.getDouble(COL_WEATHER_DEGREES),
                                                      cursor.getDouble(COL_WEATHER_WIND_SPEED));
+            // Use the dispatchPopulateAccessibilityEvent handler in DirectionSpeedView as an
+            // alternative way to dynamically set the content description for Accessibility.
 
             // forecast string for sharing
             mForecastStr = String.format("%s - %s - %s/%s", dateString, weatherDesc, high, low);

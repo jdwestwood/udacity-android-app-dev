@@ -10,8 +10,9 @@ import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.PathShape;
 import android.graphics.drawable.shapes.RoundRectShape;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityManager;
 
 /**
  * Created by John and Jai on 12/4/2014.
@@ -65,6 +66,7 @@ public class DirectionSpeedView extends View {
 
     private double mWindSpeed;
     private double mWindDirection;
+    private String mWindSpeedDir;
     String mSpeedLabels[] = new String[]{"0", "15", "30", "45", "60"};
     String mSpeedUnits = "km/h";
 
@@ -120,8 +122,11 @@ public class DirectionSpeedView extends View {
             mWindSpeed = 2.237 * windSpeed;             // 1 mph = 2.237 meters/sec
             mSpeedUnits = "mph";
         }
+        mWindSpeedDir = Utility.formatWind(mContext, windSpeed, windDirection, Utility.isMetric(mContext),
+                                           true);
         invalidate();
         requestLayout();
+//        createAccessibilityEvent();
     }
 
     private void initColors(TypedArray attrArr) {
@@ -144,7 +149,7 @@ public class DirectionSpeedView extends View {
 
     private void initDimensions(TypedArray attrArr) {
         mSize = attrArr.getDimension(R.styleable.DirectionSpeedView_preferredSize, 200);
-        Log.e(LOG_TAG, "Attribute preferredSize is: " + String.valueOf(mSize));
+//        Log.e(LOG_TAG, "Attribute preferredSize is: " + String.valueOf(mSize));
 
         COMPASS_LABEL_TEXTSIZE = mSize/14;
         SPEED_LABEL_TEXTSIZE = mSize/20;
@@ -271,7 +276,7 @@ public class DirectionSpeedView extends View {
         // x and y directions are to the right and down.
         super.onDraw(canvas);
         canvas.save();
-        canvas.translate(W_SIZE/2, H_SIZE/2);     // origin (0,0) of the canvas is now at middle of graphic
+        canvas.translate(W_SIZE / 2, H_SIZE / 2);     // origin (0,0) of the canvas is now at middle of graphic
         String[] largeLabels = {"S", "W", "N", "E"};
         drawCompassPoints(canvas, mLargeCompassPoint, COMPASS_RADIUS, 0, largeLabels);
         drawCompassPoints(canvas, mSmallCompassPoint, COMPASS_RADIUS, 45, new String[]{});
@@ -387,6 +392,25 @@ public class DirectionSpeedView extends View {
             }
             canvas.restore();
             angle += 90;
+        }
+    }
+
+    @Override
+    public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
+        // Called when an accessibility event for this view is triggered.  Add the text in
+        // mWindSpeedDir to the text that is read to the user.
+        event.getText().add(mWindSpeedDir);
+        return true;
+    }
+
+    private void createAccessibilityEvent() {
+        // To manually send an Accessibility event, for example when the content of this view
+        // changes.
+        AccessibilityManager accessibilityManager =
+                (AccessibilityManager) getContext().getSystemService(Context.ACCESSIBILITY_SERVICE);
+        if (accessibilityManager.isEnabled()) {
+            // sendAccessibilityEvent is a method of the View class
+            sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED);
         }
     }
 }

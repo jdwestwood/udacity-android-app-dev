@@ -85,6 +85,7 @@ public class ForecastAdapter extends CursorAdapter {
         // Our viewHolder already contains references to the relevant views, so set the
         // appropriate values through the viewHolder instead of costly findViewById calls.
         ViewHolder viewHolder = (ViewHolder) view.getTag();
+        String dayString;
 
         // Read the date from cursor.
         String dateString = cursor.getString(ForecastFragment.COL_WEATHER_DATE);
@@ -95,7 +96,7 @@ public class ForecastAdapter extends CursorAdapter {
             case VIEW_TYPE_TODAY:
                 viewHolder.iconView.setImageResource(Utility.getArtResourceForWeatherCondition(weatherID));
                 // Format the date, depending on whether it is Today, Tomorrow, this week, or next week.
-                viewHolder.dateView.setText(Utility.getFriendlyDayString(context, dateString));
+                dayString = Utility.getFriendlyDayString(context, dateString);
                 break;
             case VIEW_TYPE_FUTURE_DAY:
                 viewHolder.iconView.setImageResource(Utility.getIconResourceForWeatherCondition(weatherID));
@@ -103,29 +104,39 @@ public class ForecastAdapter extends CursorAdapter {
                 // Note that VIEW_TYPE_FUTURE_DAY is used for Today when Today's list item forecast
                 // format is the same as it is for future days (i.e., when the MainActivity contains
                 // both the ForecastFragment and the DetailFragment as on tablets in landscape orientation.
-                viewHolder.dateView.setText(Utility.getDayName(context, dateString));
+                dayString = Utility.getDayName(context, dateString);
                 break;
             default:
                 Log.v(LOG_TAG, "Unexpected viewType in bindView method");
+                dayString = "Unknown";
         }
+        viewHolder.dateView.setText(dayString);
+        viewHolder.dateView.setContentDescription(dayString);
 
         // Read weather forecast from cursor.
         String description = cursor.getString(ForecastFragment.COL_WEATHER_DESC);
         // Set the weather description
         viewHolder.descView.setText(description);
-        // For accessibility
-        viewHolder.iconView.setContentDescription(description);
+        viewHolder.descView.setContentDescription(description);
+
+        // Children of a ListView item must not have focusable = true or else the list item cannot
+        // be selected!  Accessibility will read the content descriptions of all the children of
+        // the list item when it is selected.  Do not set the content description for the iconView
+        // because it is a duplicate of the weather description.
+        // viewHolder.iconView.setContentDescription(description);
 
         // Read user preference for metric or imperial temperature units.
         boolean isMetric = Utility.isMetric(context);
 
         // Read high temperature from cursor.
         double high = cursor.getDouble(ForecastFragment.COL_WEATHER_MAX_TEMP);
-        viewHolder.highView.setText(Utility.formatTemperature(context, high, isMetric));
+        viewHolder.highView.setText(Utility.formatTemperature(context, high, isMetric, ""));
+        viewHolder.highView.setContentDescription(Utility.formatTemperature(context, high, isMetric, "high"));
 
         // Read low temperature from cursor.
         double low = cursor.getDouble(ForecastFragment.COL_WEATHER_MIN_TEMP);
-        viewHolder.lowView.setText(Utility.formatTemperature(context, low, isMetric));
+        viewHolder.lowView.setText(Utility.formatTemperature(context, low, isMetric, ""));
+        viewHolder.lowView.setContentDescription(Utility.formatTemperature(context, low, isMetric, "low"));
     }
 
     /**
