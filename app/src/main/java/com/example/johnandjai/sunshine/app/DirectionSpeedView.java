@@ -19,7 +19,7 @@ import android.view.accessibility.AccessibilityManager;
  */
 public class DirectionSpeedView extends View {
 
-    private final String LOG_TAG = getClass().getSimpleName();
+    private final String LOG_TAG = DirectionSpeedView.class.getSimpleName();
 
     private float mSize = 0;
     private int W_SIZE;             // width of the graphic

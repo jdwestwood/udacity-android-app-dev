@@ -67,6 +67,7 @@ public class WeatherProvider extends ContentProvider {
         // called from the query method for the WEATHER_WITH_LOCATION and WEATHER_WITH_LOCATION_AND_DATE
         // cases.  Parse the uri for the locationSetting and startDate; assign one of the selection
         // strings created above, and the selectionArgs.
+        // Corresponds to WeatherEntry.buildWeatherLocation and .buildWeatherLocationWithStartDate
         String locationSetting = WeatherEntry.getLocationSettingFromUri(uri);
         String startDate = WeatherEntry.getStartDateFromUri(uri);
 
@@ -85,6 +86,7 @@ public class WeatherProvider extends ContentProvider {
     }
 
     private Cursor getWeatherByLocationSettingAndDate(Uri uri, String[] projection, String sortOrder) {
+        // Corresponds to WeatherEntry.buildWeatherLocationWithDate
         String locationSetting = WeatherEntry.getLocationSettingFromUri(uri);
         String date = WeatherEntry.getDateFromUri(uri);
 
@@ -118,16 +120,19 @@ public class WeatherProvider extends ContentProvider {
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
                         String sortOrder) {
+        // Takes incoming query parameters and returns a Cursor into the data.
         Cursor retCursor;
         // get the MIME type of the data associated with the uri
         final int match = sUriMatcher.match(uri);
         switch (match) {
             case WEATHER_WITH_LOCATION_AND_DATE:
-                // weather/*/*
+                // weather/*/*   Corresponds to WeatherEntry.buildWeatherLocationWithDate
+
                 retCursor = getWeatherByLocationSettingAndDate(uri, projection, sortOrder);
                 break;
             case WEATHER_WITH_LOCATION:
                 // weather/* , with or without a startDate as a URI query parameter
+                // Corresponds to WeatherEntry.buildWeatherLocation and .buildWeatherLocationWithStartDate
                 retCursor = getWeatherByLocationSetting(uri, projection, sortOrder);
                 break;
             case WEATHER:
@@ -195,13 +200,15 @@ public class WeatherProvider extends ContentProvider {
 
     @Override
     public Uri insert(Uri uri, ContentValues contentValues) {
+        // insert only at the root URI's of each table.  In that way, all ContentObservers
+        // at and below the root will be notified whenever anything in the table is inserted.
+        // Note that inserts will replace previous entries with the same date and location,
+        // per the WeatherEntry table definition in WeatherDbHelper.onCreate
         Uri returnUri;
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         // get the MIME type of the data associated with the uri
         final int match = sUriMatcher.match(uri);
         switch (match) {
-            // insert only at the root URI's of each table.  In that way, all ContentObservers
-            // at and below the root will be notified whenever anything in the table is inserted.
             case WEATHER:
                 long _id = db.insert(WeatherEntry.TABLE_NAME, null, contentValues);
                 if (_id > 0) {
@@ -228,8 +235,13 @@ public class WeatherProvider extends ContentProvider {
 
     @Override
     public int bulkInsert(Uri uri, ContentValues[] values) {
-        // inserting multiple rows together is much more efficient that inserting one row at
+        // Insert multiple rows together, which is much more efficient that inserting one row at
         // a time.
+        // Insert only at the root URI's of each table.  In that way, all ContentObservers
+        // at and below the root will be notified whenever anything in the table is inserted.
+        // Note that inserts will replace previous entries with the same date and location,
+        // per the WeatherEntry table definition in WeatherDbHelper.onCreate
+
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         final int match = sUriMatcher.match(uri);
         int insertedCount = 0;
@@ -262,6 +274,8 @@ public class WeatherProvider extends ContentProvider {
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
+        // delete only at the root URI's of each table.  In that way, all ContentObservers
+        // at and below the root will be notified whenever anything in the table is deleted.
         // a null selection deletes all the rows.
         int deletedCount = 0;
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();

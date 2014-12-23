@@ -1,6 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.johnandjai.sunshine.app" >
+
+    <!-- This permission necessary for network access; current version of Android throws
+         SecurityException without this permission; Android 4.0.3 on Kindle throws
+         UnknownHostException. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Permissions required by the sync adapter -->
+    <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
+    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
+    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
+
     <!-- only image assets in the drawable- directory that corresponds to the pixel density of
          a given device are included in the .apk file targeting a particular resolution, but
          all the mipmap- directories are always included in any .apk. -->
@@ -14,7 +25,6 @@
             android:theme="@style/ForecastTheme" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -34,16 +44,46 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.johnandjai.sunshine.app.MainActivity" />
         </activity>
-        <provider
-            android:authorities="com.example.johnandjai.sunshine.app"
-            android:name=".data.WeatherProvider" />
-    </application>
 
-    <!--
-         permission necessary for network access; current version of Android throws
-         SecurityException without this permission; Android 4.0.3 on Kindle throws
-         UnknownHostException.
-    -->
-    <uses-permission android:name="android.permission.INTERNET" />
+        <!-- Our content provider. 'syncable' = true lets android know we will be sync'ing our
+             content with a server; 'exported' = false means other apps cannot see our content -->
+        <provider
+            android:authorities="@string/content_authority"
+            android:syncable="true"
+            android:exported="false"
+            android:name=".data.WeatherProvider" />
+
+        <!-- Added in the first half of Lesson 6. Tell the app we will be using the SunshineService
+             to obtain weather data
+             Note the $ in the receiver name denotes a static inner class
+        <service
+            android:name=".service.SunshineService" />
+        <receiver android:name=".service.SunshineService$AlarmReceiver" android:enabled="true"/>
+        -->
+
+        <!-- SyncAdapter's dummy authentication service.  Needed for the SyncAdapter, but purpose
+             is basically to bypass actual authenticating for this application. -->
+        <service
+            android:name=".sync.SunshineAuthenticatorService">
+            <intent-filter>
+                <action android:name="android.accounts.AccountAuthenticator" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accounts.AccountAuthenticator"
+                android:resource="@xml/authenticator" />
+            </service>
+
+        <!-- The SyncAdapter service -->
+        <service
+            android:name=".sync.SunshineSyncService"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.content.SyncAdapter"/>
+            </intent-filter>
+            <meta-data
+                android:name="android.content.SyncAdapter"
+                android:resource="@xml/syncadapter" />
+        </service>
+    </application>
 
 </manifest>

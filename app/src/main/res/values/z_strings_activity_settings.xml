@@ -1,5 +1,7 @@
+<!-- Boilerplate from Android documentation website.  Not used in Sunshine.
+     All references to this file in SettingsActivity have been commented out. -->
 <resources>
-        <string name="title_activity_settings">Settings</string>
+    <string name="title_activity_settings">Settings</string>
 
     <!-- Strings related to Settings -->
 

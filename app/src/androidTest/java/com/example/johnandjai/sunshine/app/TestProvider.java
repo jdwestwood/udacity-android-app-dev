@@ -117,6 +117,7 @@ public class TestProvider extends AndroidTestCase {
                 null);                                         // sort order
 
         verifyTableData(locationValues, locationCursor);
+        locationCursor.close();
 
         // create dummy data for the weather table.
         ContentValues weatherValues = populateWeatherData(locationRowId);

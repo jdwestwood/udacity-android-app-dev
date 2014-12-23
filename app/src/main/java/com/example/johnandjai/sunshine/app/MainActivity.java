@@ -12,6 +12,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.example.johnandjai.sunshine.app.data.WeatherContract;
+import com.example.johnandjai.sunshine.app.sync.SunshineSyncAdapter;
 import com.johnjai.romainguy.viewserver.ViewServer;
 
 import java.util.Date;
@@ -19,7 +20,7 @@ import java.util.Date;
 public class MainActivity extends ActionBarActivity implements ForecastFragment.OnItemSelectedListener {
 
     private final String LOG_TAG = MainActivity.class.getSimpleName();
-    private SharedPreferences sharedPrefs;
+    private SharedPreferences mSharedPrefs;
     private boolean mTwoPane;
 
     @Override
@@ -57,6 +58,10 @@ public class MainActivity extends ActionBarActivity implements ForecastFragment.
                         .commit();
         }
 
+        // Make sure we have gotten an account.  The function also does an immediate sync to get
+        // the current weather data.
+        SunshineSyncAdapter.initializeSyncAdapter(this);
+
         // Enable HierarchyViewer functionality; see notes for the ViewServer class in the
         // ViewServer module.
         ViewServer.get(this).addWindow(this);
@@ -66,7 +71,7 @@ public class MainActivity extends ActionBarActivity implements ForecastFragment.
     protected void onStart() {
         super.onStart();
         Log.d(LOG_TAG, "Starting (becomes visible)");
-        sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+        mSharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
     }
 
     @Override
@@ -142,6 +147,9 @@ public class MainActivity extends ActionBarActivity implements ForecastFragment.
                 Intent intent = new Intent(this, SettingsActivity.class);
                 startActivity(intent);
                 return true;
+            /* Up until the end of Lesson 6, the View Location menu action was handled here.  We
+               gave Google Maps the location and let Google Maps find it.  At the end of Lesson 6,
+               we moved the View Location handling to ForecastFragment.
             case R.id.action_view_location:
                 // On Kindle, default is that Google apps are not available; see
                 // http://www.cnet.com/how-to/how-to-get-maps-gmail-on-the-kindle-fire-hd-without-rooting/
@@ -149,25 +157,13 @@ public class MainActivity extends ActionBarActivity implements ForecastFragment.
                 // part of the project will work.  Other useful links for Android .apk files:
                 // http://forum.xda-developers.com/showthread.php?t=1897380
                 // http://www.androiddrawer.com/
-                String location = sharedPrefs.getString(getString(R.string.pref_location_key),
+                String location = mSharedPrefs.getString(getString(R.string.pref_location_key),
                                                         getString(R.string.pref_location_default));
                 // Using Uri.parse().buildUpon... mangles the Uri so Google Maps does not understand it.
                 Uri geoLocation = Uri.parse("geo:0,0?q=" + location);
-                showMap(geoLocation);
+                showMap(geoLocation);  */
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
-
-    public void showMap(Uri geoLocation) {
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        intent.setData(geoLocation);
-        if (intent.resolveActivity(getPackageManager()) != null) {
-            startActivity(intent);
-        } else {
-            Log.d(LOG_TAG, "Could not map location " + geoLocation.toString());
-        }
-    }
-
 }

@@ -1,3 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Option menu 'Settings' item inflated in the onCreateOptionsMenu handler
+     in DetailActivity.  The action taken when the user clicks
+     'Settings' is assigned in onOptionsItemSelected in DetailActivity
+     via the id attribute. -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"

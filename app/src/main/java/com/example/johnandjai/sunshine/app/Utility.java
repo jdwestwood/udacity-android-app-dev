@@ -29,7 +29,7 @@ public class Utility {
     public static boolean isMetric(Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         return prefs.getString(context.getString(R.string.pref_units_key),
-                context.getString(R.string.pref_units_metric))
+                context.getString(R.string.pref_units_default))
                 .equals(context.getString(R.string.pref_units_metric));
     }
 

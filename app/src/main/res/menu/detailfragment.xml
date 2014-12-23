@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 
+<!-- Option menu item 'Share' inflated in the onCreateOptionsMenu handler
+     in DetailFragment.  The action taken when the user clicks
+     'Share' is assigned below via the android:actionProviderClass
+     via the attribute -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
       xmlns:app="http://schemas.android.com/apk/res-auto">
     <item android:id="@+id/action_share"

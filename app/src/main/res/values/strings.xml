@@ -24,6 +24,7 @@
     <string name="pref_units_key" translatable="false">units</string>
     <!-- List entry labels for the temperature units setting -->
     <string name="pref_units_metric" translatable="false">Metric</string>
+    <string name="pref_units_default" translatable="false">Metric</string>
     <string name="pref_units_imperial" translatable="false">Imperial</string>
     <string-array name="pref_units_entries">
         <item>@string/pref_units_metric</item>
@@ -36,6 +37,28 @@
         <item>@string/pref_units_metric</item>
         <item>@string/pref_units_imperial</item>
     </string-array>
+
+    <!-- Strings related to Notification preference-->
+    <!-- Key name for accessing the value of the Notifications preference CheckBoxPreference item -->
+    <string name="pref_notifications_key" translatable="false">notifications</string>
+    <!-- Label for the Notifications preference setting-->
+    <string name="pref_notifications_label">Weather Notifications</string>
+    <string name="pref_notifications_on">Enabled</string>
+    <string name="pref_notifications_off">Not Enabled</string>
+    <bool name="pref_notifications_default">true</bool>
+    <string name="pref_last_notification" translatable="false">last_notification</string>
+
+    <!-- Notification format -->
+    <string name="format_notification">
+        Forecast: <xliff:g id="condition">%1$s</xliff:g>, High: <xliff:g id="high">%2$s</xliff:g>
+        , Low: <xliff:g id="low">%3$s</xliff:g>
+    </string>
+
+    <!-- Strings for sync adapter (see the sync folder and Lesson 6 video).
+         Note the same content_authority string must be used by the sync adapter and the
+         content_provider -->
+    <string name="sync_account_type">sunshine.example.com</string>
+    <string name="content_authority">com.example.johnandjai.sunshine.app</string>
 
     <!-- Date label when displaying today's weather forecast [CHAR LIMIT=20] -->
     <string name="today">Today</string>

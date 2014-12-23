@@ -1,9 +1,14 @@
 package com.example.johnandjai.sunshine.app;
 
 import android.app.Activity;
+import android.content.ContentResolver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
@@ -19,6 +24,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.example.johnandjai.sunshine.app.data.WeatherContract;
+import com.example.johnandjai.sunshine.app.sync.SunshineSyncAdapter;
 
 import java.util.Date;
 
@@ -26,8 +32,12 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     // LoaderManager.LoaderCallbacks interface allows ForecastFragment to be notified when
     // the weather data changes and update its content accordingly.
 
-    public ForecastFragment() {
-    }
+    private Context mContext;
+    private SharedPreferences mSharedPrefs;
+    private ContentResolver mContentResolver;
+    private String mLocation;                    // instance variable to save our location
+
+    public ForecastFragment() {}
 
     /**
      * A callback interface that all activities containing this fragment must
@@ -45,9 +55,8 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     // the callback interface of the containing activity (MainActivity)
     private OnItemSelectedListener mItemSelectedListenerInterface;
 
-    private final String LOG_TAG = getClass().getSimpleName();
+    private final String LOG_TAG = ForecastFragment.class.getSimpleName();
 
-    private String mLocation;                    // instance variable to save our location
     private boolean mUseTodayLayout;
 
     // Each loader in a Fragment has an ID, which allows multiple Loaders to be active at the
@@ -96,6 +105,18 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     private static int mPosition = 0;           // current selected position in the forecast list
     private static String mDate;                // forecast date for the currently selected position
 
+    // For the View Location menu item, we need to fetch the latitude and longitude of the
+    // current location from the LocationEntry table;
+    private static final String[] VIEW_LOCATION_COLUMNS = {
+            WeatherContract.LocationEntry.COLUMN_COORD_LAT,
+            WeatherContract.LocationEntry.COLUMN_COORD_LONG
+    };
+
+    // These columns indices are tied to VIEW_LOCATION_COLUMNS.  If VIEW_LOCATION_COLUMNS changes,
+    // these must change as well.
+    public static final int COL_COORD_LAT = 0;
+    public static final int COL_COORD_LONG = 1;
+
     // implement the LoaderManager.LoaderCallbacks<Cursor> interface
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
@@ -107,14 +128,14 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         // Sort order: ascending, by date.
         String sortOrder = WeatherContract.WeatherEntry.COLUMN_DATETEXT + " ASC";
 
-        mLocation = Utility.getPreferredLocation(getActivity());
+        mLocation = Utility.getPreferredLocation(mContext);
         Uri weatherForLocationUri =
                 WeatherContract.WeatherEntry.buildWeatherLocationWithStartDate(mLocation, startDate);
         Log.d("ForecastFragment", "Uri: " + weatherForLocationUri.toString());
 
         // Now create and return a CursorLoader that will take care of
         // creating a Cursor for the data being displayed.
-        return new CursorLoader(getActivity(),
+        return new CursorLoader(mContext,
                 weatherForLocationUri,                    // query for the Loader
                 FORECAST_COLUMNS,                         // projection
                 null,                                     // selection
@@ -154,6 +175,9 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
+        mContext = activity;
+        mSharedPrefs = PreferenceManager.getDefaultSharedPreferences(mContext);
+        mContentResolver = mContext.getContentResolver();
         // This makes sure that the container activity has implemented
         // the callback interface. If not, it throws an exception
         try {
@@ -187,6 +211,32 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
             case R.id.action_refresh:
                 updateWeather();
                 return true;
+            /* Added at the end of Lesson 6.  Prior to that, we handled the View Location menu item
+               in MainActivity
+             */
+            case R.id.action_view_location:
+                // On Kindle, default is that Google apps are not available; see
+                // http://www.cnet.com/how-to/how-to-get-maps-gmail-on-the-kindle-fire-hd-without-rooting/
+                // for how to manually install the Google Maps app and other Google apps so this
+                // part of the project will work.  Other useful links for Android .apk files:
+                // http://forum.xda-developers.com/showthread.php?t=1897380
+                // http://www.androiddrawer.com/
+                String location = mSharedPrefs.getString(getString(R.string.pref_location_key),
+                        getString(R.string.pref_location_default));
+                String selection = WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING + " = ?";
+                String selectionArg[] = {location};
+                Cursor cursor = mContentResolver.query(WeatherContract.LocationEntry.CONTENT_URI,
+                                       VIEW_LOCATION_COLUMNS, selection, selectionArg, null);
+                if (cursor.moveToFirst()) {
+                    double latitude = cursor.getDouble(COL_COORD_LAT);
+                    double longitude = cursor.getDouble(COL_COORD_LONG);
+                    cursor.close();
+                    // Using Uri.parse().buildUpon... mangles the Uri so Google Maps does not understand it.
+                    // The zoom on the Google Map depends on how many decimal places lat and long have.
+                    String uriString = String.format("geo:%.1f,%.1f", latitude, longitude);
+                    Uri geoLocation = Uri.parse(uriString);
+                    showMap(geoLocation);
+                }
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -212,7 +262,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         // rows in the weather database.
         /*
         mForecastAdapter = new SimpleCursorAdapter(
-                getActivity(),        // the current context (this fragment's parent activity)
+                mContext,        // the current context (this fragment's parent activity)
                 R.layout.list_item_forecast,         // ID of list item layout (XML filename)
                 null,                                // Cursor, will be specified later
                 // put the data in these column names in the database as fetched by CursorLoader...
@@ -244,7 +294,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
                     case COL_WEATHER_MIN_TEMP: {
                         // for max and min temperature, we have to do some formatting and possibly
                         // a conversion.
-                        boolean isMetric = Utility.isMetric(getActivity());
+                        boolean isMetric = Utility.isMetric(mContext);
                         ((TextView) view).setText(Utility.formatTemperature(
                                         cursor.getDouble(columnIndex), isMetric)
                         );
@@ -265,7 +315,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         // Final version uses a custom ForecastAdapter extended from CursorAdapter, which
         // supports multiple list item views: today's forecast has a different layout than
         // all the other days.
-        mForecastAdapter = new ForecastAdapter(getActivity(), null, 0);
+        mForecastAdapter = new ForecastAdapter(mContext, null, 0);
         mForecastAdapter.setUseTodayLayout(mUseTodayLayout);
 
         mListView = (ListView) rootView.findViewById(R.id.listview_forecast);
@@ -288,7 +338,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
                     // extracted from the cursor holding the weather data from the database;
                     // the forecast string was then passed to the intent that launches DetailActivity
                     // using Intent.EXTRA_TEXT.
-                    // boolean isMetric = Utility.isMetric(getActivity());
+                    // boolean isMetric = Utility.isMetric(mContext);
                     // String forecast = String.format("%s - %s - %s/%s",
                     //        Utility.formatDate(cursor.getString(COL_WEATHER_DATE)),
                     //        cursor.getString(COL_WEATHER_DESC),
@@ -298,7 +348,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
                     // Third method passes just the db date string in COL_WEATHER_DATE to the
                     // DetailActivity; the ContentLoader in DetailActivity will get all the forecast
                     // data for that date via the appropriate URI.
-                    // Intent intent = new Intent(getActivity(), DetailActivity.class)
+                    // Intent intent = new Intent(mContext, DetailActivity.class)
                     //        .putExtra(DetailActivity.DATE_KEY, cursor.getString(COL_WEATHER_DATE));
                     // startActivity(intent);
 
@@ -310,7 +360,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
                     // it is the callback interface for the containing activity.
                     mDate = cursor.getString(COL_WEATHER_DATE);
                     mItemSelectedListenerInterface.onItemSelected(mDate);
-//                Toast.makeText(getActivity(), forecast, Toast.LENGTH_SHORT).show();
+//                Toast.makeText(mContext, forecast, Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -340,16 +390,48 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         // event triggered when activity resumes after user navigates away (to the Settings menu,
         // for example.
         super.onResume();
-        if (mLocation != null && !Utility.getPreferredLocation(getActivity()).equals(mLocation)) {
+        if (mLocation != null && !Utility.getPreferredLocation(mContext).equals(mLocation)) {
             // load weather data from database; (do NOT run a FetchWeatherTask).
             getLoaderManager().restartLoader(FORECAST_LOADER, null, this);
         }
     }
 
     private void updateWeather() {
+
+        /* In Lessons 1-5, we use an AsyncTask to fetch the weather data from the weather API.  But
+           an Async task continue to run and keeps the Activity that spawned around, even if we
+           no longer need it, as when the user switches from portrait to landscape orientation.
+
         // Get the location value in the Settings and get the weather forecast data.
-        String location = Utility.getPreferredLocation(getActivity());
-        new FetchWeatherTask(getActivity()).execute(location);
+         String location = Utility.getPreferredLocation(mContext);
+         new FetchWeatherTask(mContext).execute(location); */
+
+        /* In the first half of Lesson 6, we fetch the weather data using a service.  We create
+           an explicit intent and start the Service using startService() (as contrasted with
+           startActivity() if we want to use the explicit intent to start an Activity.
+
+        // Get the location value in the Settings and get the weather forecast data.
+        String location = Utility.getPreferredLocation(mContext);
+        // Get the AlarmManager for the device.
+        AlarmManager alarmManager = (AlarmManager) mContext.getSystemService(mContext.ALARM_SERVICE);
+        // Specify the intent that will be broadcast when the alarm goes off.
+        Intent alarmIntent = new Intent(mContext, SunshineService.AlarmReceiver.class)
+                .putExtra(SunshineService.LOCATION_QUERY_KEY, location);
+        // Create a pending intent that will be triggered when the alarm goes off, and will in
+        // turn trigger the serviceIntent.
+        PendingIntent pendingIntent = PendingIntent
+                                     .getBroadcast(mContext, 0, alarmIntent, PendingIntent.FLAG_ONE_SHOT);
+        // Run the service when the alarm goes off ...
+        alarmManager.set(AlarmManager.RTC_WAKEUP,
+                         System.currentTimeMillis() + 5000, pendingIntent);
+        // .. or to run the service immediately
+        // Intent serviceIntent = new Intent(mContext, SunshineService.class)
+        //        .putExtra(SunshineService.LOCATION_QUERY_KEY, location);
+        // mContext.startService(serviceIntent); */
+
+        /* In the second half of Lesson 6, we implement the SunshineSyncAdapter.  We request the
+           sync adapter to update the forecast data. */
+        SunshineSyncAdapter.syncImmediately(mContext);
     }
 
     public void setUseTodayLayout(boolean useTodayLayout) {
@@ -361,5 +443,16 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
 
     public String getSelectedForecastDate() {
         return mDate;
+    }
+
+    public void showMap(Uri geoLocation) {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        intent.setData(geoLocation);
+        if (intent.resolveActivity(mContext.getPackageManager()) != null) {
+            startActivity(intent);
+        } else {
+            Log.d(LOG_TAG, "Could not map location " + geoLocation.toString());
+        }
     }
 }

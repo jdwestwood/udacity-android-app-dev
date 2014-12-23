@@ -1,11 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Option menu items 'View Location' and 'Settings' inflated in the
+     onCreateOptionsMenu handler in MainActivity  The action taken when the user clicks
+     'Settings' or 'View Location' is assigned in onOptionsItemSelected in MainActivity
+     via the id attribute. -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".MainActivity" >
-    <item android:id="@+id/action_view_location"
-        android:title="@string/action_view_location"
-        android:orderInCategory="2"
-        app:showAsAction="never" />
     <item android:id="@+id/action_settings"
         android:title="@string/action_settings"
         android:orderInCategory="100"

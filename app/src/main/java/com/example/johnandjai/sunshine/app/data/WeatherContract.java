@@ -73,7 +73,8 @@ public class WeatherContract {
 
         public static Uri buildWeatherLocationWithStartDate(String locationSetting, String startDate) {
             // URI for retrieving weather starting on a specified date, which is put into the URI
-            // as a URI query parameter.
+            // as a URI query parameter.  The query parameter is extracted via Uri.getQueryParameter
+            // (see the getStartDateFromUri method below).
             return CONTENT_URI.buildUpon().appendPath(locationSetting)
                     .appendQueryParameter(COLUMN_DATETEXT, startDate).build();
         }
@@ -93,6 +94,9 @@ public class WeatherContract {
         }
 
         public static String getStartDateFromUri(Uri uri) {
+            // Called from WeatherProvider.getWeatherByLocationSetting to extract the startDate
+            // which is passed as a uri query parameter in the buildWeatherLocationWithStartDate
+            // above.
             return uri.getQueryParameter(COLUMN_DATETEXT);
         }
     }

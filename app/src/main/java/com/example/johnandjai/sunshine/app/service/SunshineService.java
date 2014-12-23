@@ -1,29 +1,35 @@
-package com.example.johnandjai.sunshine.app;
+package com.example.johnandjai.sunshine.app.service;
 
-import android.content.Context;
-import android.os.AsyncTask;
+import android.app.IntentService;
+import android.content.Intent;
 
 /**
- * Created by John and Jai on 10/24/2014.
+ * Created by John and Jai on 12/18/2014.
  */
-public class FetchWeatherTask extends AsyncTask<String, Void, Void> {
+public class SunshineService extends IntentService {
+    /* Added in first half of Lesson 6, replaces the AsyncTask FetchWeatherTask.  Abandoned in the
+       second half of Lesson 6 and SunshineSyncAdapter used instead. */
+    // SunshineService fetches the weather data using a service.
+    // Note that a Service is a context, so no need for mContext here.
 
-    private final String LOG_TAG = FetchWeatherTask.class.getSimpleName();
-    private Context mContext;
+    private final String LOG_TAG = SunshineService.class.getSimpleName();
+    public static String LOCATION_QUERY_KEY = "location";
 
-    public FetchWeatherTask(Context context) {
-        mContext = context;
+    public SunshineService() {
+        super("SunshineService");
     }
 
-    protected Void doInBackground(String... params) {
+    @Override
+    protected void onHandleIntent(Intent intent) {
+        /*
+        // This code was originally the doInBackground method of FetchWeatherTask
 
-    /* As of Lesson 6, FetchWeatherTask was replaced by SunshineService.  The code in doInBackground
-       and associated helper methods was moved to onHandleIntent in SunshineService.
-        if (params.length == 0) {
-            return null;
+        String locationQuery;
+        if (intent.hasExtra(LOCATION_QUERY_KEY)) {
+            locationQuery = intent.getExtras().getString(LOCATION_QUERY_KEY);
+        } else {
+            return;
         }
-
-        String locationQuery = params[0];
 
         // These two need to be declared outside the try/catch
         // so that they can be closed in the finally block.
@@ -62,7 +68,7 @@ public class FetchWeatherTask extends AsyncTask<String, Void, Void> {
             StringBuffer buffer = new StringBuffer();
             if (inputStream == null) {
                 // Nothing to do.
-                return null;
+                return;
             }
             reader = new BufferedReader(new InputStreamReader(inputStream));
 
@@ -76,7 +82,7 @@ public class FetchWeatherTask extends AsyncTask<String, Void, Void> {
 
             if (buffer.length() == 0) {
                 // Stream was empty.  No point in parsing.
-                return null;
+                return;
             }
             forecastJsonStr = buffer.toString();
 //                Log.i("JSON from api.openweathermap.org: ", forecastJsonStr);
@@ -156,26 +162,26 @@ public class FetchWeatherTask extends AsyncTask<String, Void, Void> {
                     double windDirection = dayForecast.getDouble(OWM_DEGREES);
 
                     ContentValues weatherValues = new ContentValues();
-                    weatherValues.put(WeatherEntry.COLUMN_LOC_KEY, locationId);
-                    weatherValues.put(WeatherEntry.COLUMN_DATETEXT, WeatherContract.getDbDateString(date));
-                    weatherValues.put(WeatherEntry.COLUMN_HUMIDITY, humidity);
-                    weatherValues.put(WeatherEntry.COLUMN_PRESSURE, pressure);
-                    weatherValues.put(WeatherEntry.COLUMN_WIND_SPEED, windSpeed);
-                    weatherValues.put(WeatherEntry.COLUMN_DEGREES, windDirection);
-                    weatherValues.put(WeatherEntry.COLUMN_MAX_TEMP, high);
-                    weatherValues.put(WeatherEntry.COLUMN_MIN_TEMP, low);
-                    weatherValues.put(WeatherEntry.COLUMN_SHORT_DESC, description);
-                    weatherValues.put(WeatherEntry.COLUMN_WEATHER_ID, weatherId);
+                    weatherValues.put(WeatherContract.WeatherEntry.COLUMN_LOC_KEY, locationId);
+                    weatherValues.put(WeatherContract.WeatherEntry.COLUMN_DATETEXT, WeatherContract.getDbDateString(date));
+                    weatherValues.put(WeatherContract.WeatherEntry.COLUMN_HUMIDITY, humidity);
+                    weatherValues.put(WeatherContract.WeatherEntry.COLUMN_PRESSURE, pressure);
+                    weatherValues.put(WeatherContract.WeatherEntry.COLUMN_WIND_SPEED, windSpeed);
+                    weatherValues.put(WeatherContract.WeatherEntry.COLUMN_DEGREES, windDirection);
+                    weatherValues.put(WeatherContract.WeatherEntry.COLUMN_MAX_TEMP, high);
+                    weatherValues.put(WeatherContract.WeatherEntry.COLUMN_MIN_TEMP, low);
+                    weatherValues.put(WeatherContract.WeatherEntry.COLUMN_SHORT_DESC, description);
+                    weatherValues.put(WeatherContract.WeatherEntry.COLUMN_WEATHER_ID, weatherId);
 
                     cVVector.add(weatherValues);
                 }
                 addWeather(cVVector);
-                Log.d(LOG_TAG, "FetchWeatherTask complete!");
-                return null;
+                Log.d(LOG_TAG, "Fetch weather data complete!");
+                return;
             } catch (JSONException e) {
                 Log.e(LOG_TAG, e.getMessage(), e);
                 e.printStackTrace();
-                return null;
+                return;
             }
 
         } catch (IOException e) {
@@ -183,7 +189,7 @@ public class FetchWeatherTask extends AsyncTask<String, Void, Void> {
 //                e.printStackTrace();
             // If the code didn't successfully get the weather data, there's no point in attempting
             // to parse it.
-            return null;
+            return;
         } finally{
             if (urlConnection != null) {
                 urlConnection.disconnect();
@@ -195,22 +201,19 @@ public class FetchWeatherTask extends AsyncTask<String, Void, Void> {
                     Log.e(LOG_TAG, "Error closing stream", e);
                 }
             }
-        }
-        */
-        return null;
+        } */
     }
 
-    /* As of Lesson 6, FetchWeatherTask was replaced by SunshineService.  The code in doInBackground
-    and these associated helper methods was moved to onHandleIntent in SunshineService.
-
+    /*
     private void addWeather(Vector<ContentValues> cVVector) {
         if (cVVector.size() > 0) {
-            Uri weatherUri = WeatherEntry.CONTENT_URI;
+            Uri weatherUri = WeatherContract.WeatherEntry.CONTENT_URI;
             // convert the Vector into an array.
             ContentValues[] cvArray = new ContentValues[cVVector.size()];
             cVVector.toArray(cvArray);
-            // use .bulkInsert here to insert multiple entries efficiently.
-            mContext.getContentResolver().bulkInsert(weatherUri, cvArray);
+            // A Service is a context, so can call getContentResolver directly with the data.
+            // Use .bulkInsert here to insert multiple entries efficiently.
+            getContentResolver().bulkInsert(weatherUri, cvArray);
             Log.v(LOG_TAG, "Inserted weather for " + cVVector.size() + " days");
         } else {
             Log.v(LOG_TAG, "In addWeather, did not insert any rows.");
@@ -221,117 +224,42 @@ public class FetchWeatherTask extends AsyncTask<String, Void, Void> {
         // checks if the locationSetting exists in the location table and if not adds it.
         // returns the id of the location.
         Log.v(LOG_TAG, "Inserting " + cityName + " with coordinates: " + lat + ", " + lon);
-        Uri locationUri = LocationEntry.CONTENT_URI;
-        String[] projection = {LocationEntry._ID};
-        String selection = LocationEntry.COLUMN_LOCATION_SETTING + " = " + locationSetting;
-        Cursor cursor = mContext.getContentResolver()
-                .query(LocationEntry.CONTENT_URI, projection, selection, null, null);
+        Uri locationUri = WeatherContract.LocationEntry.CONTENT_URI;
+        String[] projection = {WeatherContract.LocationEntry._ID};
+        String selection = WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING + " = " + locationSetting;
+
+        // A Service is a context, so can call getContentResolver directly with the data.
+        Cursor cursor = getContentResolver()
+                .query(WeatherContract.LocationEntry.CONTENT_URI, projection, selection, null, null);
         if (cursor.moveToFirst()) {
             // found a row; need to get and return the id
             Log.v(LOG_TAG, "Found it in the database.");
-            return cursor.getLong(cursor.getColumnIndex(LocationEntry._ID));
+            return cursor.getLong(cursor.getColumnIndex(WeatherContract.LocationEntry._ID));
         } else {
             // insert a row with the new locationSetting
             Log.v(LOG_TAG, "Did not find it in the database, so will insert it now.");
             ContentValues values = new ContentValues();
-            values.put(LocationEntry.COLUMN_LOCATION_SETTING, locationSetting);
-            values.put(LocationEntry.COLUMN_CITY_NAME, cityName);
-            values.put(LocationEntry.COLUMN_COORD_LAT, lat);
-            values.put(LocationEntry.COLUMN_COORD_LONG, lon);
-            Uri insertUri = mContext.getContentResolver()
-                    .insert(LocationEntry.CONTENT_URI, values);
+            values.put(WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING, locationSetting);
+            values.put(WeatherContract.LocationEntry.COLUMN_CITY_NAME, cityName);
+            values.put(WeatherContract.LocationEntry.COLUMN_COORD_LAT, lat);
+            values.put(WeatherContract.LocationEntry.COLUMN_COORD_LONG, lon);
+            Uri insertUri = getContentResolver()
+                    .insert(WeatherContract.LocationEntry.CONTENT_URI, values);
             return ContentUris.parseId(insertUri);
         }
-    }  */
+    }
 
-    /* No longer used, but keep for reference.
-    /* The date/time conversion code is going to be moved outside the AsyncTask later,
-     * so for convenience we're breaking it out into its own method now.
-    private String getReadableDateString(long time){
-        // Because the API returns a unix timestamp (measured in seconds),
-        // it must be converted to milliseconds in order to be converted to valid date.
-        Date date = new Date(time * 1000);
-        SimpleDateFormat format = new SimpleDateFormat("E, MMM d");
-        return format.format(date).toString();
+    static public class AlarmReceiver extends BroadcastReceiver {
+
+        private final String LOG_TAG = AlarmReceiver.class.getSimpleName();
+
+        public void onReceive(Context context, Intent intent) {
+            // The 'intent' is the Intent that was sent to this broadcast receiver.
+            // Log.e(LOG_TAG, "Received an alarm!");
+            String location = intent.getStringExtra(SunshineService.LOCATION_QUERY_KEY);
+            Intent serviceIntent = new Intent(context, SunshineService.class)
+                                       .putExtra(SunshineService.LOCATION_QUERY_KEY, location);
+            context.startService(serviceIntent);
+        }
     } */
-
-    /* No longer used, but keep for reference
-     * Prepare the weather high/lows for presentation.
-    private String formatHighLows(double high, double low) {
-        // units from forecast API are metric already
-        double convertedHigh = high;
-        double convertedLow = low;
-        String metric = getString(R.string.pref_units_metric);
-        String imperial = getString(R.string.pref_units_imperial);
-        // scale is the entry value for the chosen entry label
-        String scale = sharedPrefs.getString(getString(R.string.pref_units_key), metric);
-        if (scale.equals(imperial)) {
-            convertedHigh = 1.8*high + 32;
-            convertedLow = 1.8*low + 32;
-        }
-        // For presentation, assume the user doesn't care about tenths of a degree.
-        long roundedHigh = Math.round(convertedHigh);
-        long roundedLow = Math.round(convertedLow);
-
-        String highLowStr = roundedHigh + "/" + roundedLow;
-        return highLowStr;
-    } */
-
-    /* No longer used, but keep for reference
-     * Take the String representing the complete forecast in JSON Format and
-     * pull out the data we need to construct the Strings needed for the wireframes.
-     *
-     * Fortunately parsing is easy:  constructor takes the JSON string and converts it
-     * into an Object hierarchy for us.
-
-    private String[] getWeatherDataFromJson(String forecastJsonStr, int numDays)
-            throws JSONException {
-
-        // These are the names of the JSON objects that need to be extracted.
-        final String OWM_LIST = "list";
-        final String OWM_WEATHER = "weather";
-        final String OWM_TEMPERATURE = "temp";
-        final String OWM_MAX = "max";
-        final String OWM_MIN = "min";
-        final String OWM_DATETIME = "dt";
-        final String OWM_DESCRIPTION = "main";
-
-        JSONObject forecastJson = new JSONObject(forecastJsonStr);
-        JSONArray weatherArray = forecastJson.getJSONArray(OWM_LIST);
-
-        String[] resultStrs = new String[numDays];
-        for(int i = 0; i < weatherArray.length(); i++) {
-            // For now, using the format "Day, description, hi/low"
-            String day;
-            String description;
-            String highAndLow;
-
-            // Get the JSON object representing the day
-            JSONObject dayForecast = weatherArray.getJSONObject(i);
-
-            // The date/time is returned as a long.  We need to convert that
-            // into something human-readable, since most people won't read "1400356800" as
-            // "this saturday".
-            long dateTime = dayForecast.getLong(OWM_DATETIME);
-            day = getReadableDateString(dateTime);
-
-            // description is in a child array called "weather", which is 1 element long.
-            JSONObject weatherObject = dayForecast.getJSONArray(OWM_WEATHER).getJSONObject(0);
-            description = weatherObject.getString(OWM_DESCRIPTION);
-
-            // Temperatures are in a child object called "temp".  Try not to name variables
-            // "temp" when working with temperature.  It confuses everybody.
-            JSONObject temperatureObject = dayForecast.getJSONObject(OWM_TEMPERATURE);
-            double high = temperatureObject.getDouble(OWM_MAX);
-            double low = temperatureObject.getDouble(OWM_MIN);
-
-            highAndLow = formatHighLows(high, low);
-            resultStrs[i] = day + " - " + description + " - " + highAndLow;
-        }
-
-        for (String s : resultStrs) {
-//                Log.i(LOG_TAG, "Forecast entry: " + s);
-        }
-        return resultStrs;
-    }   */
 }

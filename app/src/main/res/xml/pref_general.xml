@@ -1,14 +1,10 @@
+<!-- The preference Settings screen used in Sunshine; inflated in setupSimplePreferencesScreen
+     in SettingsActivity (Also referenced in the boilerplate code from the Android documentation
+     website in the GeneralPreferenceFragment in SettingsActivity, which is not used in Sunshine. -->
+
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-
-    <!--
-    <CheckBoxPreference
-        android:key="example_checkbox"
-        android:title="@string/pref_title_social_recommendations"
-        android:summary="@string/pref_description_social_recommendations"
-        android:defaultValue="true" />
-    -->
 
     <!-- NOTE: EditTextPreference accepts EditText attributes. -->
     <!-- NOTE: EditTextPreference's summary should be set to its value by the activity code. -->
@@ -29,10 +25,19 @@
     <ListPreference
         android:key="@string/pref_units_key"
         android:title="@string/pref_units_label"
-        android:defaultValue="@string/pref_units_metric"
         android:entries="@array/pref_units_entries"
         android:entryValues="@array/pref_units_values"
+        android:defaultValue="@string/pref_units_default"
         android:negativeButtonText="@null"
         android:positiveButtonText="@null" />
+
+    <CheckBoxPreference
+        android:key="@string/pref_notifications_key"
+        android:title="@string/pref_notifications_label"
+        android:defaultValue="@bool/pref_notifications_default"
+        android:summaryOn="@string/pref_notifications_on"
+        android:summaryOff="@string/pref_notifications_off"/>
+    -->
+
 
 </PreferenceScreen>

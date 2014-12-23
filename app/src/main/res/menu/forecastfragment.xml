@@ -1,9 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 
+<!-- Option menu item 'Refresh' inflated in the onCreateOptionsMenu handler
+     in ForecastFragment.  The action taken when the user clicks
+     'Refresh' is assigned in onOptionsItemSelected in ForecastFragment
+     via the id attribute. -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
       xmlns:app="http://schemas.android.com/apk/res-auto">
     <item android:id="@+id/action_refresh"
         android:title="@string/action_refresh"
         android:orderInCategory="1"
+        app:showAsAction="never" />
+    <item android:id="@+id/action_view_location"
+        android:title="@string/action_view_location"
+        android:orderInCategory="2"
         app:showAsAction="never" />
 </menu>

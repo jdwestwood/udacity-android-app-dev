@@ -62,7 +62,7 @@ public class TestDb extends AndroidTestCase {
 
         // A cursor is the primary interface to the query results; use a custom projection
         // (the columns array).
-        Cursor cursor = db.query(LocationEntry.TABLE_NAME,    // table to query
+        Cursor locationCursor = db.query(LocationEntry.TABLE_NAME,    // table to query
                 locationColumns,
                 null,                                          // columns for the 'where' clause
                 null,                                          // values for the 'where' clause
@@ -71,7 +71,8 @@ public class TestDb extends AndroidTestCase {
                 null                                           // sort order
         );
 
-        verifyTableData(locationValues, cursor);
+        verifyTableData(locationValues, locationCursor);
+        locationCursor.close();
 
         // create dummy data for the weather table.
         ContentValues weatherValues = populateWeatherData(locationRowId);
@@ -96,7 +97,7 @@ public class TestDb extends AndroidTestCase {
                 WeatherEntry.COLUMN_DEGREES};
 
         // Query for all rows in the WeatherEntry table
-        cursor = db.query(WeatherEntry.TABLE_NAME,             // table to query
+        Cursor weatherCursor = db.query(WeatherEntry.TABLE_NAME,             // table to query
                 weatherColumns,
                 null,                                          // columns for the 'where' clause
                 null,                                          // values for the 'where' clause
@@ -104,7 +105,8 @@ public class TestDb extends AndroidTestCase {
                 null,                                          // columns to filter by row groups
                 null);                                         // sort order
 
-         verifyTableData(weatherValues, cursor);
+        verifyTableData(weatherValues, weatherCursor);
+        weatherCursor.close();
     }
 
     private void verifyTableData(ContentValues values, Cursor cursor) {

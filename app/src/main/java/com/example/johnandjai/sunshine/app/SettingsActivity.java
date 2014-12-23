@@ -7,12 +7,14 @@ package com.example.johnandjai.sunshine.app;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
@@ -23,6 +25,7 @@ import android.text.TextUtils;
 import android.view.MenuItem;
 
 import com.example.johnandjai.sunshine.app.data.WeatherContract;
+import com.example.johnandjai.sunshine.app.sync.SunshineSyncAdapter;
 
 import java.util.List;
 
@@ -38,6 +41,8 @@ import java.util.List;
  * API Guide</a> for more information on developing a Settings UI.
  */
 public class SettingsActivity extends PreferenceActivity {
+
+    private static final String LOG_TAG = SettingsActivity.class.getSimpleName();
     /**
      * Determines whether to always show the simplified settings UI, where
      * settings are presented in a single list. When false, settings are shown
@@ -110,7 +115,7 @@ public class SettingsActivity extends PreferenceActivity {
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-
+// ***  Used in Sunshine  ***
         setupSimplePreferencesScreen();
     }
 
@@ -127,11 +132,14 @@ public class SettingsActivity extends PreferenceActivity {
         // use the older PreferenceActivity APIs, which is why the method calls
         // are struck out.
 
+// ***  Used in Sunshine on the Kindle  (i.e., ignore the strike-outs) ***
         // Add 'general' preferences:  Location and Temperature units in this case
         addPreferencesFromResource(R.xml.pref_general);
-        // bindPreferenceSummaryToValue method is defined below.
+        // Attach an event listener to each preference item using the bindPreferenceSummaryToValue
+        // method defined below and trigger the listener with the current value of the item.
         bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_location_key)));
         bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_units_key)));
+        bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_notifications_key)));
 
         /* Original code when the Settings Activity is created from the
            New - Activity - Settings Activity menu
@@ -140,13 +148,13 @@ public class SettingsActivity extends PreferenceActivity {
         PreferenceCategory fakeHeader = new PreferenceCategory(this);
         fakeHeader.setTitle(R.string.pref_header_notifications);
         getPreferenceScreen().addPreference(fakeHeader);
-        addPreferencesFromResource(R.xml.pref_notification);
+        addPreferencesFromResource(R.xml.z_pref_notification);
 
         // Add 'data and sync' preferences, and a corresponding header.
         fakeHeader = new PreferenceCategory(this);
         fakeHeader.setTitle(R.string.pref_header_data_sync);
         getPreferenceScreen().addPreference(fakeHeader);
-        addPreferencesFromResource(R.xml.pref_data_sync);
+        addPreferencesFromResource(R.xml.z_pref_data_sync);
 
         // Bind the summaries of preferences to their values. When their values change, their
         // summaries are updated to reflect the new value, per the Android Design guidelines.
@@ -157,6 +165,116 @@ public class SettingsActivity extends PreferenceActivity {
         bindPreferenceSummaryToValue(findPreference("sync_frequency"));
         */
     }
+
+    /**
+     * Binds a preference's summary to its value. More specifically, when the
+     * preference's value is changed, its summary (line of text below the
+     * preference title) is updated to reflect the value. The summary is also
+     * immediately updated upon calling this method. The exact display format is
+     * dependent on the type of preference.
+     *
+     * @see #sBindPreferenceSummaryToValueListener
+     */
+    private static void bindPreferenceSummaryToValue(Preference preference) {
+        mBindingPreference = true;
+        // Set the listener to watch for value changes.
+        preference.setOnPreferenceChangeListener(sBindPreferenceSummaryToValueListener);
+
+        // Trigger the listener immediately with the preference's
+        // current value.
+        Object value;
+        SharedPreferences sharedPreferences =
+                       PreferenceManager.getDefaultSharedPreferences(preference.getContext());
+        if (preference instanceof CheckBoxPreference) {
+            CheckBoxPreference checkBoxPreference = (CheckBoxPreference) preference;
+            value = sharedPreferences.getBoolean(checkBoxPreference.getKey(), true);
+        } else if (preference instanceof ListPreference) {
+            ListPreference listPreference = (ListPreference) preference;
+            value = sharedPreferences.getString(listPreference.getKey(), "");
+        } else {
+            value = sharedPreferences.getString(preference.getKey(), "");
+        }
+        sBindPreferenceSummaryToValueListener.onPreferenceChange(preference, value);
+        mBindingPreference = false;
+    }
+
+    /**
+     * A preference value change listener that updates the preference's summary
+     * to reflect its new value.
+     */
+    private static Preference.OnPreferenceChangeListener sBindPreferenceSummaryToValueListener
+            = new Preference.OnPreferenceChangeListener() {
+        @Override
+        public boolean onPreferenceChange(Preference preference, Object value) {
+            String stringValue = value.toString();
+            Context context = preference.getContext();
+            if (!mBindingPreference) {
+                // if preference has already been bound
+                if (preference.getKey().equals(context.getString(R.string.pref_location_key))) {
+                    /* In Lessons 1-5, we used FetchWeatherTask to get weather data
+
+                    // if location was changed, get new weather data.
+                    FetchWeatherTask weatherTask = new FetchWeatherTask(context);
+                    String location = stringValue;
+                    weatherTask.execute(location); */
+
+                    /* In Lesson 6, we implemented SunshineSyncAdapter to get weather data */
+                    SunshineSyncAdapter.syncImmediately(context);
+
+                } else {
+                    // notify content URI to allow the cursor to update that weather may be affected
+                    context.getContentResolver()
+                            .notifyChange(WeatherContract.WeatherEntry.CONTENT_URI, null);
+                }
+            }
+
+            if (preference instanceof ListPreference) {
+                // For list preferences, look up the correct display value in
+                // the preference's 'entries' list.
+                ListPreference listPreference = (ListPreference) preference;
+                // stringValue is the entry value for the chosen entry label
+                int index = listPreference.findIndexOfValue(stringValue);
+
+                // Set the summary to reflect the chosen entry label.
+                preference.setSummary(
+                        index >= 0
+                                ? listPreference.getEntries()[index]
+                                : null);
+
+            } else if (preference instanceof CheckBoxPreference) {
+                // Summary value set in pref_general.xml using :summaryOff and :summaryOn.
+                // Log.e(LOG_TAG, "Set Checkbox to " + stringValue);
+
+            } else if (preference instanceof RingtonePreference) {
+                // For ringtone preferences, look up the correct display value
+                // using RingtoneManager.
+                if (TextUtils.isEmpty(stringValue)) {
+                    // Empty values correspond to 'silent' (no ringtone).
+                    preference.setSummary(R.string.pref_ringtone_silent);
+
+                } else {
+                    Ringtone ringtone = RingtoneManager.getRingtone(
+                            preference.getContext(), Uri.parse(stringValue));
+
+                    if (ringtone == null) {
+                        // Clear the summary if there was a lookup error.
+                        preference.setSummary(null);
+                    } else {
+                        // Set the summary to reflect the new ringtone display
+                        // name.
+                        String name = ringtone.getTitle(preference.getContext());
+                        preference.setSummary(name);
+                    }
+                }
+
+            } else {
+                // For all other preferences, set the summary to the value's
+                // simple string representation.
+                preference.setSummary(stringValue);
+            }
+            return true;
+        }
+    };
 
     /** {@inheritDoc} */
     @Override
@@ -197,104 +315,14 @@ public class SettingsActivity extends PreferenceActivity {
             // create Settings headers from XML file; Settings groups under each header are specified
             // in XML files for each group; the XML headers file specifies the PreferenceFragment
             // to create for each Settings group.
-            loadHeadersFromResource(R.xml.pref_headers, target);
+            loadHeadersFromResource(R.xml.z_pref_headers, target);
         }
     }
 
     /**
-     * A preference value change listener that updates the preference's summary
-     * to reflect its new value.
-     */
-    private static Preference.OnPreferenceChangeListener sBindPreferenceSummaryToValueListener
-                       = new Preference.OnPreferenceChangeListener() {
-        @Override
-        public boolean onPreferenceChange(Preference preference, Object value) {
-            String stringValue = value.toString();
-            Context context = preference.getContext();
-            if (!mBindingPreference) {
-                // if preference has already been bound
-                if (preference.getKey().equals(context.getString(R.string.pref_location_key))) {
-                    // if location was changed, get new weather data.
-                    FetchWeatherTask weatherTask = new FetchWeatherTask(context);
-                    String location = stringValue;
-                    weatherTask.execute(location);
-                } else {
-                    // notify content URI to allow the cursor to update that weather may be affected
-                    preference.getContext().getContentResolver()
-                              .notifyChange(WeatherContract.WeatherEntry.CONTENT_URI, null);
-                }
-            }
-
-            if (preference instanceof ListPreference) {
-                // For list preferences, look up the correct display value in
-                // the preference's 'entries' list.
-                ListPreference listPreference = (ListPreference) preference;
-                // stringValue is the entry value for the chosen entry label
-                int index = listPreference.findIndexOfValue(stringValue);
-
-                // Set the summary to reflect the chosen entry label.
-                preference.setSummary(
-                        index >= 0
-                                ? listPreference.getEntries()[index]
-                                : null);
-
-            } else if (preference instanceof RingtonePreference) {
-                // For ringtone preferences, look up the correct display value
-                // using RingtoneManager.
-                if (TextUtils.isEmpty(stringValue)) {
-                    // Empty values correspond to 'silent' (no ringtone).
-                    preference.setSummary(R.string.pref_ringtone_silent);
-
-                } else {
-                    Ringtone ringtone = RingtoneManager.getRingtone(
-                            preference.getContext(), Uri.parse(stringValue));
-
-                    if (ringtone == null) {
-                        // Clear the summary if there was a lookup error.
-                        preference.setSummary(null);
-                    } else {
-                        // Set the summary to reflect the new ringtone display
-                        // name.
-                        String name = ringtone.getTitle(preference.getContext());
-                        preference.setSummary(name);
-                    }
-                }
-
-            } else {
-                // For all other preferences, set the summary to the value's
-                // simple string representation.
-                preference.setSummary(stringValue);
-            }
-            return true;
-        }
-    };
-
-    /**
-     * Binds a preference's summary to its value. More specifically, when the
-     * preference's value is changed, its summary (line of text below the
-     * preference title) is updated to reflect the value. The summary is also
-     * immediately updated upon calling this method. The exact display format is
-     * dependent on the type of preference.
-     *
-     * @see #sBindPreferenceSummaryToValueListener
-     */
-    private static void bindPreferenceSummaryToValue(Preference preference) {
-        mBindingPreference = true;
-        // Set the listener to watch for value changes.
-        preference.setOnPreferenceChangeListener(sBindPreferenceSummaryToValueListener);
-
-        // Trigger the listener immediately with the preference's
-        // current value.
-        sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
-                PreferenceManager
-                        .getDefaultSharedPreferences(preference.getContext())
-                        .getString(preference.getKey(), ""));
-        mBindingPreference = false;
-    }
-
-    /**
-     * This fragment shows general preferences only. It is used when the
-     * activity is showing a two-pane settings UI.
+     * Boilerplate for General Preferences category from the Android documentation website.
+     * Not used in Sunshine.  This fragment shows General Preferences only. It is used when the
+     * activity is showing a two-pane settings UI.  Instantiated in z_pref_headers.xmlml
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public static class GeneralPreferenceFragment extends PreferenceFragment {
@@ -313,15 +341,16 @@ public class SettingsActivity extends PreferenceActivity {
     }
 
     /**
-     * This fragment shows notification preferences only. It is used when the
-     * activity is showing a two-pane settings UI.
+     * Boilerplate for Notification Preferences category from the Android documentation website.
+     * Not used in Sunshine.  This fragment shows Notification Preferences only. It is used when the
+     * activity is showing a two-pane settings UI.  Instantiated in z_pref_headers.xmlml
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public static class NotificationPreferenceFragment extends PreferenceFragment {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-            addPreferencesFromResource(R.xml.pref_notification);
+            addPreferencesFromResource(R.xml.z_pref_notification);
 
             // Bind the summaries of EditText/List/Dialog/Ringtone preferences
             // to their values. When their values change, their summaries are
@@ -332,15 +361,16 @@ public class SettingsActivity extends PreferenceActivity {
     }
 
     /**
-     * This fragment shows data and sync preferences only. It is used when the
-     * activity is showing a two-pane settings UI.
+     * Boilerplate for Sync Preferences category from the Android documentation website.
+     * Not used in Sunshine.  This fragment shows Sync Preferences only. It is used when the
+     * activity is showing a two-pane settings UI.  Instantiated in z_pref_headers.xmlml
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public static class DataSyncPreferenceFragment extends PreferenceFragment {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-            addPreferencesFromResource(R.xml.pref_data_sync);
+            addPreferencesFromResource(R.xml.z_pref_data_sync);
 
             // Bind the summaries of EditText/List/Dialog/Ringtone preferences
             // to their values. When their values change, their summaries are

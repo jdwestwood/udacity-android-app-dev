@@ -26,7 +26,7 @@ public class ForecastAdapter extends CursorAdapter {
         super(context, c, flags);
     }
 
-    private final String LOG_TAG = getClass().getSimpleName();
+    private final String LOG_TAG = ForecastAdapter.class.getSimpleName();
     private boolean mUseTodayLayout;
     private final int VIEW_TYPE_TODAY = 0;              // list_item_forecast_today.xml
     private final int VIEW_TYPE_FUTURE_DAY = 1;         // list_item_forecast.xml
